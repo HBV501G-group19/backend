@@ -1,0 +1,11 @@
+spring.datasource.url=jdbc:postgresql://localhost:5432/hbv501
+spring.datasource.username=your_db_username
+spring.datasource.password=your_db_password
+ors.key=your_ors_key
+
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.spatial.dialect.postgis.PostgisDialect
+spring.jpa.hibernate.format-sql=true
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
