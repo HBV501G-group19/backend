@@ -20,4 +20,16 @@ The project comes prepackaged in a Maven wrapper. It can be run with
 ./mvnw install && ./mvnw spring-boot:run
 ```
 
+## TODO:
+
+* [ ] Finna út úr hvernig það er hægt að bæta við passenger í ride
+* [ ] Setja upp endpoints fyrir user og ride
+  * [ ] GET á `/ride/` og `ride/{id}` til að ná í
+  * [ ] POST á `/ride` til þess að búa til nýtt
+  * [ ] PATCH á `/ride/{id}` til þess að bæta við farþega og uppfærA
+  * [ ] GET á `/user/` og `/user/{id}` til að ná í
+  * [ ] POST á `/user` til að búa til
+  * [ ] Patch á `/user` til að breyta upplýsingum(low priority)
+* [ ] Setja upp search endpoint til að leita með, þýðir pottþétt þörf á controller og líklega líka service
+
 

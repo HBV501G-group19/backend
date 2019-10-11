@@ -1,10 +1,10 @@
-package hi.is.hbvproject.hbvproject.persistence.repositories;
-import hi.is.hbvproject.hbvproject.persistence.enties.User;
-
+package is.hi.hbvproject.persistence.repositories;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
+
+import is.hi.hbvproject.persistence.entities.User;
 
 @Repository
 public interface UserRepository {
@@ -15,5 +15,5 @@ public interface UserRepository {
 	public List<User> findAll();
 	public List<User> findAllById(Iterable<Long> ids);
 	public List<User> deleteUsers(Iterable<Long> ids);
-	public List<User> deleteAll();
+	public List<User> deleteAll(); 
 }
