@@ -2,8 +2,6 @@ package is.hi.hbvproject.persistence.entities;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -12,8 +10,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.locationtech.jts.geom.LineString;
@@ -41,7 +39,10 @@ public class Ride {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User driver;
 	
-	@OneToMany(fetch = FetchType.LAZY)
+	@ManyToMany(
+			mappedBy = "rides",
+			fetch = FetchType.LAZY
+			)
 	private Set<User> passengers = new HashSet<>();
 	
 	@CreationTimestamp
@@ -80,7 +81,8 @@ public class Ride {
 		
 	public Ride() {}
 	
-	public Ride(Point o, Point d, LineString r, Date time, boolean isArrivalTime, short seats) {
+	public Ride(Point o, Point d, LineString r, Date time, boolean isArrivalTime, short seats, User driver) {
+		this.driver = driver;
 		this.origin = o;
 		this.destination = d;
 		this.route = r;
@@ -96,6 +98,16 @@ public class Ride {
 	
 	public User getDriver() {
 		return driver;
+	}
+	
+	public void setDriver(User driver) {
+		this.driver = driver;
+	}
+	
+	public void addPassenger(User passenger) {
+		this.passengers.add(passenger);
+		this.setFreeSeats(--freeSeats);
+		passenger.getRides().add(this);
 	}
 	
 	public Set<User> getPassengers() {
@@ -180,19 +192,13 @@ public class Ride {
 	}
 	
 	public void setFreeSeats(short seats) {
-		short newSeats = (short) (freeSeats - seats);
-		if (newSeats < 0) {
+		if (seats < 0) {
 			// handle
 			throw new Error("Trying to set less then 0 free seats");
-		} else if (newSeats > totalSeats) {
+		} else if (seats > totalSeats) {
 			throw new Error("Trying to set more free seats then total seats");
 		}
 		
-		freeSeats = newSeats;
-	}
-	
-	public void addPassenger(User user) {
-		this.setFreeSeats((short) (freeSeats - 1));
-		passengers.add(user);
+		freeSeats = seats;
 	}
 }
