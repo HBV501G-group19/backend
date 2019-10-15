@@ -2,6 +2,7 @@
 
 * [Postgresql v10.10](https://postgresql.org/)
 * [Postgis 2.4](https://postgis.net/)
+* An API key for the [Open Route Service](https://openrouteservice.org/dev)
 
 ## Database
 Before running the project setting up a database running Postgis is necessary. This can be done by running the command
@@ -12,6 +13,11 @@ in your database.
 
 ## Application properties
 An example can be found in [application.properties.example](./tree/src/main/resources/application.properties.example)
+The properties that must be changed are
+* `spring.datasource.url`
+* `spring.datasource.username`
+* `spring.datasource.password`
+* `ors.key`
 
 ## Building and running
 The project comes prepackaged in a Maven wrapper. It can be run with
