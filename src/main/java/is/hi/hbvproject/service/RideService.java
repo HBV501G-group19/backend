@@ -10,7 +10,7 @@ import is.hi.hbvproject.persistence.entities.User;
 
 public interface RideService {
 	List<Ride> findNearby(Geometry origin, Geometry destination);
-	void addPassenger(long id, User passenger);
+	void addPassenger(long rideId, User passenger);
 	void	delete(Ride ride);
 	void deleteAll();
 	long count();

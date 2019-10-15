@@ -8,6 +8,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -23,7 +26,18 @@ public class User {
 	@NotNull
 	private String password;
 	
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(
+			mappedBy = "driver",
+			fetch = FetchType.LAZY
+			)
+	private Set<Ride> drives = new HashSet<>();
+	
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(
+			name = "passengers",
+			joinColumns = @JoinColumn(name = "passenger_id"),
+			inverseJoinColumns = @JoinColumn(name = "ride_id")
+			)
 	private Set<Ride> rides = new HashSet<>();
 	
 	public User() {}
@@ -42,5 +56,13 @@ public class User {
 	
 	public long getId() {
 		return id;
+	}
+	
+	public Set<Ride> getDrives() {
+		return drives;
+	}
+	
+	public Set<Ride> getRides() {
+		return rides;
 	}
 }
