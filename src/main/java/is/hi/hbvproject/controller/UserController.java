@@ -1,5 +1,6 @@
 package is.hi.hbvproject.controller;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +44,9 @@ public class UserController {
 	)
 	public Optional<User> getUserById(@PathVariable long id) {
 		Optional<User> user = service.findById(id);
+		if (!user.isPresent()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+		}
 		return user;
 	}
 	
@@ -57,7 +62,10 @@ public class UserController {
 		ObjectMapper mapper = new ObjectMapper();
 		User user = mapper.readValue(body, User.class);
 		
-		// TODO: höndla villu út af SQL unique constraint
+		if (service.existsByUsername(user.getUsername())) {
+			// ekki viss með þennan status kóða
+			throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User already exists");
+		}
 		service.save(user);
 		return user;
 	}

@@ -11,6 +11,7 @@ public interface UserService {
 	long count();
 	void deleteById(Long id);
 	boolean existsById(Long id);
+	boolean existsByUsername(String username);
 	List<User> findAll();
 	List<User> findAllById(Iterable<Long> ids);
 	Optional<User> findById(Long id);

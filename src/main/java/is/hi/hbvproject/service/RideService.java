@@ -11,10 +11,10 @@ import is.hi.hbvproject.persistence.entities.User;
 public interface RideService {
 	List<Ride> findNearby(Geometry origin, Geometry destination);
 	void addPassenger(long rideId, User passenger);
-	void	delete(Ride ride);
+	void delete(Ride ride);
 	void deleteAll();
 	long count();
-	void	deleteById(Long id);
+	void deleteById(Long id);
 	boolean existsById(Long id);
 	List<Ride> findAll();
 	List<Ride> findAllById(Iterable<Long> ids);
