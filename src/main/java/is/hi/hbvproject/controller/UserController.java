@@ -4,7 +4,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import is.hi.hbvproject.persistence.entities.User;
 import is.hi.hbvproject.service.UserService;
@@ -57,11 +56,8 @@ public class UserController {
 		produces = "application/json"
 	)
 	public User createUser(
-		@RequestBody String body
+		@RequestBody User user
 	) throws JsonParseException, JsonMappingException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		User user = mapper.readValue(body, User.class);
-		
 		if (service.existsByUsername(user.getUsername())) {
 			// ekki viss með þennan status kóða
 			throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User already exists");
