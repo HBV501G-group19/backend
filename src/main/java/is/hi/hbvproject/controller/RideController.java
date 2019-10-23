@@ -2,8 +2,6 @@ package is.hi.hbvproject.controller;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,6 +66,16 @@ public class RideController {
 		return ride.get();
 	}
 	
+	@RequestMapping("/point")
+	public LineString point() {
+		double[][] d = {
+				{2.0, 3.5},
+				{2.5, 3},
+		};
+		LineString l = new LineString(d);
+		return l;
+	}
+	
 	@RequestMapping(
 			value = "/rides/create",
 			method = RequestMethod.POST,
@@ -76,27 +84,28 @@ public class RideController {
 	)
 	public Ride createRide(@RequestBody String body) {
 		JSONObject json = new JSONObject(body);
-		long driverId = json.getLong("driverId");
+		long driverId = json.getLong("driver_id");
 		Optional<User> driver = userService.findById(driverId);
 		if (!driver.isPresent()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User id: " + driverId + " not found");
 		}
 		
-		String originJson = json.getString("origin");
-		String destinationJson = json.getString("destination");
-		String routeJson = json.getString("route");
+		JSONObject originJson = json.getJSONObject("origin");
+		JSONObject destinationJson = json.getJSONObject("destination");
+		JSONObject routeJson = json.getJSONObject("route");
 		
-		Point origin = (Point) GeoJSONFactory.create(originJson);
-		Point destination = (Point) GeoJSONFactory.create(destinationJson);
-		LineString route = (LineString) GeoJSONFactory.create(routeJson);
+		Point origin = (Point) GeoJSONFactory.create(originJson.toString());
 		
-		String departureTimeJson = json.getString("departureTime");
+		Point destination = (Point) GeoJSONFactory.create(destinationJson.toString());
+
+		LineString route = (LineString) GeoJSONFactory.create(routeJson.toString());
+		
+		String departureTimeJson = json.getString("departure_time");
 		LocalDate departureTime = LocalDate.parse(departureTimeJson);
 		
 		long duration = json.getLong("duration");
-		
 		short seats = (short) json.getInt("seats");
-		
+
 		List<User> passengers = new ArrayList<>();
 		if (json.has("passengers")) {
 			JSONArray passengerIds = json.getJSONArray("passengers");
@@ -112,7 +121,7 @@ public class RideController {
 				passengers.add(passenger.get());
 			});
 		}
-			
+		
 		Ride ride = new Ride(
 			origin,
 			destination,
@@ -123,7 +132,7 @@ public class RideController {
 			driver.get(),
 			passengers
 		);
-
+		rideService.save(ride);
 		return ride;
 	}
 	

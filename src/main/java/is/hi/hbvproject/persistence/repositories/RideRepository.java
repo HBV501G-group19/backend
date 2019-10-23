@@ -9,13 +9,14 @@ import is.hi.hbvproject.persistence.entities.Ride;
 
 import java.util.List;
 import java.util.Optional;
-import org.locationtech.jts.geom.Geometry;
+
+import org.geolatte.geom.G2D;
 
 @Repository
 public interface RideRepository extends JpaRepository<Ride, Long>{
 	@Query(value = "select r from Ride r where within(r.origin, :origin) = true "
 			+ "and within(r.destination, :destination) = true")
-	List<Ride> findNearby(@Param("origin") Geometry origin, @Param("destination") Geometry destination);
+	List<Ride> findNearby(@Param("origin") org.geolatte.geom.Point<G2D> origin, @Param("destination") org.geolatte.geom.Point<G2D> destination);
 	public void	delete(Ride ride);
 	public void deleteAll();
 	public long count();

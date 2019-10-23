@@ -3,9 +3,8 @@ import is.hi.hbvproject.service.RideService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import org.locationtech.jts.geom.Geometry;
+import org.geolatte.geom.G2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +26,7 @@ public class RideServiceImplementation implements RideService {
 	}
 	
 	@Override
-	public List<Ride> findNearby(Geometry origin, Geometry destination) {
+	public List<Ride> findNearby(org.geolatte.geom.Point<G2D> origin, org.geolatte.geom.Point<G2D> destination) {
 		return rideRepository.findNearby(origin, destination);
 	};
 	
