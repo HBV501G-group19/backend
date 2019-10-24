@@ -1,12 +1,11 @@
 package is.hi.hbvproject.service.Implementation;
-import is.hi.hbvproject.service.UserService;
+
+import is.hi.hbvproject.persistence.entities.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import is.hi.hbvproject.persistence.entities.User;
-import is.hi.hbvproject.persistence.repositories.UserRepository;
 
 @Service
 public class MessageServiceImplementation implements MessageService {
@@ -19,29 +18,39 @@ public class MessageServiceImplementation implements MessageService {
     }
 
     @Override
-    public void	delete(Message message) {
+    public void delete(Message message) {
         messageRepository.delete(message);
-    };
+    }
+
+    ;
 
     @Override
     public void deleteAll() {
-        userRepository.deleteAll();
-    };
+        messageRepository.deleteAll();
+    }
+
+    ;
 
     @Override
     public long count() {
-        return userRepository.count();
-    };
+        return messageRepository.count();
+    }
+
+    ;
 
     @Override
-    public void	deleteById(Long id) {
-        userRepository.deleteById(id);
-    };
+    public void deleteById(Long id) {
+        messageRepository.deleteById(id);
+    }
+
+    ;
 
     @Override
     public boolean existsById(Long id) {
-        return userRepository.existsById(id);
-    };
+        return messageRepository.existsById(id);
+    }
+
+    ;
 
     @Override
     public boolean existsByUsername(String username) {
@@ -49,27 +58,37 @@ public class MessageServiceImplementation implements MessageService {
     }
 
     @Override
-    public List<User> findAll() {
-        return userRepository.findAll();
-    };
+    public List<Message> findAll() {
+        return messageRepository.findAll();
+    }
+
+    ;
 
     @Override
-    public List<User> findAllById(Iterable<Long> ids) {
-        return userRepository.findAllById(ids);
-    };
+    public List<Message> findAllById(Iterable<Long> ids) {
+        return messageRepository.findAllById(ids);
+    }
+
+    ;
 
     @Override
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
-    };
+    public Optional<Message> findById(Long id) {
+        return messageRepository.findById(id);
+    }
+
+    ;
 
     @Override
-    public User save(User user) {
-        return userRepository.save(user);
-    };
+    public Message save(Message message) {
+        return messageRepository.save(Message);
+    }
+
+    ;
 
     @Override
-    public void deleteAll(Iterable<? extends User> users) {
-        userRepository.deleteAll(users);
-    };
+    public void deleteAll(Iterable<? extends Message> messages) {
+        messageRepository.deleteAll(messages);
+    }
+
+    ;
 }

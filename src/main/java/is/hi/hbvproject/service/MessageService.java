@@ -1,20 +1,30 @@
 package is.hi.hbvproject.service;
 
+import is.hi.hbvproject.persistence.entities.Message;
+
 import java.util.List;
 import java.util.Optional;
 
-import is.hi.hbvproject.persistence.entities.User;
-
 public interface MessageService {
-    void delete(User user);
+    void delete(Message message);
+
     void deleteAll();
+
     long count();
+
     void deleteById(Long id);
+
     boolean existsById(Long id);
-    boolean existsByUsername(String username);
-    List<User> findAll();
-    List<User> findAllById(Iterable<Long> ids);
-    Optional<User> findById(Long id);
-    User save(User user);
-    void deleteAll(Iterable<? extends User> users);
+
+    boolean Message(String message);
+
+    List<Message> findAll();
+
+    List<Message> findAllById(Iterable<Long> ids);
+
+    Optional<Message> findById(Long id);
+
+    Message save(Message message);
+
+    void deleteAll(Iterable<? extends Message> messages);
 }
