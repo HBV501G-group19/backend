@@ -121,7 +121,6 @@ public class RideController {
 				passengers.add(passenger.get());
 			});
 		}
-		
 		Ride ride = new Ride(
 			origin,
 			destination,

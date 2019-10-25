@@ -19,16 +19,12 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.geolatte.geom.G2D;
-import org.geolatte.geom.Geometries;
-import org.geolatte.geom.PositionSequenceBuilders;
-import org.geolatte.geom.crs.CoordinateReferenceSystems;
-import org.geolatte.geom.PositionSequenceBuilder;
-
 import org.wololo.geojson.Point;
+import org.wololo.geojson.LineString;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 
-import org.wololo.geojson.LineString;
+import is.hi.hbvproject.utils.WololoGeolatteConverter;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -80,7 +76,6 @@ public class Ride {
 	private short freeSeats;
 		
 	public Ride() {}
-	//public Ride(Point o, Point d, LineString r, Date departureTime, long duration, short seats, User driver) {
 
 	public Ride(
 			Point o,
@@ -98,39 +93,11 @@ public class Ride {
 		this.totalSeats = seats;
 		this.freeSeats = seats;
         
-		double[] oCoords = o.getCoordinates();
-		org.geolatte.geom.Point<G2D> origin = Geometries.mkPoint(new G2D(oCoords[0], oCoords[1]), CoordinateReferenceSystems.WGS84);
-		//org.locationtech.jts.geom.Coordinate c = new org.locationtech.jts.geom.Coordinate(oCoords[0], oCoords[1]);
-		//org.locationtech.jts.geom.Point p = (org.locationtech.jts.geom.Point) org.locationtech.jts.geom.;
-		//org.geojson.Point origin = new org.geojson.Point(new LngLatAlt(oCoords[0], oCoords[1], 0.0));
-		this.origin = origin;
+		this.origin = WololoGeolatteConverter.toGeolattePoint(o);
+		this.destination = WololoGeolatteConverter.toGeolattePoint(d);
+		this.route = WololoGeolatteConverter.toGeolatteLineString(r);
 		
-		double[] dCoords = d.getCoordinates();
-		//org.geojson.Point destination = new org.geojson.Point(new LngLatAlt(dCoords[0], dCoords[1], 0.0));
-		org.geolatte.geom.Point<G2D> destination = Geometries.mkPoint(new G2D(dCoords[0], dCoords[1]), CoordinateReferenceSystems.WGS84);
-		this.destination = destination;
-		
-		//org.geolatte.geom.LineString<G2D> x = Geometries.mkLineString(, null);
-		
-		double[][] routeCoords = r.getCoordinates();
-		// Húrra fyrir java
-		PositionSequenceBuilder<G2D> x = 
-			PositionSequenceBuilders.fixedSized(
-				routeCoords.length,
-				origin.getPositionClass()
-			);
-		
-		for(double[] coord : routeCoords) {
-			x.add(coord[0], coord[1]);
-		}
-		org.geolatte.geom.LineString<G2D> route = 
-			new org.geolatte.geom.LineString<G2D>(
-				x.toPositionSequence(),
-				origin.getCoordinateReferenceSystem()
-			);
-		this.route = route;
-		
-		passengers.forEach(passenger -> this.passengers.add(passenger));
+		passengers.forEach(passenger -> this.addPassenger(passenger));
 	}
 	
 	public Long getId() {
@@ -146,8 +113,11 @@ public class Ride {
 	}
 	
 	public void addPassenger(User passenger) {
+		if (freeSeats == 0) {
+			throw new Error("No available space in ride");
+		}
 		this.passengers.add(passenger);
-		this.setFreeSeats(--freeSeats);
+		this.setFreeSeats((short)(freeSeats - 1));
 		passenger.getRides().add(this);
 	}
 	
@@ -174,17 +144,11 @@ public class Ride {
 	
 	@JsonGetter("origin")
 	public Point getOriginJson() {
-		double[] coords = new double[2];
-		origin.getPositions().getCoordinates(0, coords);
-		Point o = new Point(coords);
-		return o;
+		return WololoGeolatteConverter.toWololoPoint(origin);
 	}
 
 	public void setOrigin(Point o) {
-		double[] oCoords = o.getCoordinates();
-		org.geolatte.geom.Point<G2D> origin = Geometries.mkPoint(new G2D(oCoords[0], oCoords[1]), CoordinateReferenceSystems.WGS84);
-		//org.geojson.Point origin = new org.geojson.Point(new LngLatAlt(oCoords[0], oCoords[1], 0.0));
-		this.origin = origin;
+		this.origin = WololoGeolatteConverter.toGeolattePoint(o);
 	}
 
 	public org.geolatte.geom.Point<G2D> getDestination() {
@@ -193,17 +157,12 @@ public class Ride {
 	
 	@JsonGetter("destination")
 	public Point getDestinationJson() {
-		double[] coords = new double[2];
-		origin.getPositions().getCoordinates(0, coords);
-		Point d = new Point(coords);
-		return d;
+		return WololoGeolatteConverter.toWololoPoint(destination);
 	}
 	
 	public void setDestination(Point d) {
-		double[] dCoords = d.getCoordinates();
-		org.geolatte.geom.Point<G2D> destination = Geometries.mkPoint(new G2D(dCoords[0], dCoords[1]), CoordinateReferenceSystems.WGS84);
-		//org.geojson.Point destination = new org.geojson.Point(new LngLatAlt(dCoords[0], dCoords[1], 0.0));
-		this.destination = destination;
+		this.destination = WololoGeolatteConverter.toGeolattePoint(d);
+
 	}
 
 	public org.geolatte.geom.LineString<G2D> getRoute() {
@@ -212,45 +171,11 @@ public class Ride {
 	
 	@JsonGetter("route")
 	public LineString getRouteGeoJson() {
-		List<double[]> coords = new ArrayList<>();
-		double[][] coordArray = new double[this.route.getNumPositions()][this.route.getCoordinateDimension()];
-		this.route.getPositions().forEach(position -> {
-			double[] coord = new double[2];
-			position.toArray(coord);
-			coords.add(coord);
-		});
-		
-		coordArray = coords.toArray(coordArray);
-		LineString r = new LineString(coordArray);
-		return r;
+		return WololoGeolatteConverter.toWololoLineString(route);
 	}
 
 	public void setRoute(LineString r) {
-		//org.geojson.LineString newRoute = new org.geojson.LineString();
-		//for(double[] coord : route) {
-		//	LngLatAlt lngLatAlt = new LngLatAlt(coord[0], coord[1], 0.0);
-		//	newRoute.add(lngLatAlt);
-		//}
-		
-		//this.route = newRoute;
-		
-		double[][] routeCoords = r.getCoordinates();
-		// Húrra fyrir java
-		PositionSequenceBuilder<G2D> x = 
-			PositionSequenceBuilders.fixedSized(
-				routeCoords.length,
-				origin.getPositionClass()
-			);
-		
-		for(double[] coord : routeCoords) {
-			x.add(coord[0], coord[1]);
-		}
-		org.geolatte.geom.LineString<G2D> newRoute = 
-			new org.geolatte.geom.LineString<G2D>(
-				x.toPositionSequence(),
-				origin.getCoordinateReferenceSystem()
-			);
-		this.route = newRoute;
+		this.route = WololoGeolatteConverter.toGeolatteLineString(r);
 	}
 
 	public LocalDate getDepartureTime() {
@@ -281,8 +206,8 @@ public class Ride {
 		if (seats < 0) {
 			// handle
 			throw new Error("Trying to set less then 0 free seats");
-		} else if (seats > totalSeats) {
-			throw new Error("Trying to set more free seats then total seats");
+		} else if (seats > totalSeats | seats > freeSeats) {
+			throw new Error("Trying to set more free seats then available seats");
 		}
 		
 		freeSeats = seats;
