@@ -1,5 +1,6 @@
 package is.hi.hbvproject.service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +10,12 @@ import is.hi.hbvproject.persistence.entities.Ride;
 import is.hi.hbvproject.persistence.entities.User;
 
 public interface RideService {
-	List<Ride> findNearby(org.geolatte.geom.Point<G2D> origin, org.geolatte.geom.Point<G2D> destination);
+	List<Ride> findNearby(
+		org.geolatte.geom.Polygon<G2D> origin,
+		org.geolatte.geom.Polygon<G2D> destination,
+		Timestamp minTime,
+		Timestamp maxTime
+	);
 	void addPassenger(long rideId, User passenger);
 	void delete(Ride ride);
 	void deleteAll();

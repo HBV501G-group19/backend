@@ -10,6 +10,7 @@ import org.geolatte.geom.PositionSequenceBuilders;
 import org.geolatte.geom.crs.CoordinateReferenceSystems;
 import org.wololo.geojson.LineString;
 import org.wololo.geojson.Point;
+import org.wololo.geojson.Polygon;
 
 public class WololoGeolatteConverter {
 	public static LineString toWololoLineString(org.geolatte.geom.LineString<G2D> lineString) {
@@ -54,5 +55,25 @@ public class WololoGeolatteConverter {
 		double[] coords = point.getCoordinates();
 		org.geolatte.geom.Point<G2D> geolattePoint = Geometries.mkPoint(new G2D(coords[0], coords[1]), CoordinateReferenceSystems.WGS84);
 		return geolattePoint;
+	}
+	
+	public static org.geolatte.geom.Polygon<G2D> toGeolattePolygon(Polygon polygon) {
+		double[][] coords = polygon.getCoordinates()[0];
+		PositionSequenceBuilder<G2D> x = 
+			PositionSequenceBuilders.fixedSized(
+				coords.length,
+				org.geolatte.geom.G2D.class
+			);
+		
+		for(double[] coord : coords) {
+			x.add(coord[0], coord[1]);
+		}
+		
+		org.geolatte.geom.Polygon<G2D> geolattePolygon = 
+			new org.geolatte.geom.Polygon<G2D>(
+				x.toPositionSequence(),
+				CoordinateReferenceSystems.WGS84
+			);
+		return geolattePolygon;
 	}
 }

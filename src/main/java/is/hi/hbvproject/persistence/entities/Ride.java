@@ -1,6 +1,6 @@
 package is.hi.hbvproject.persistence.entities;
 
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -15,7 +15,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
 import org.geolatte.geom.G2D;
@@ -47,9 +48,10 @@ public class Ride {
 	private Set<User> passengers = new HashSet<>();
 	
 	@CreationTimestamp
-	private LocalDate created;
+	private Timestamp created;
 	@UpdateTimestamp
-	private LocalDate updated;
+	private Timestamp upTimestampd;
+	
 	
 	@NotNull
 	@Column(columnDefinition = "geometry")
@@ -64,7 +66,7 @@ public class Ride {
 	private org.geolatte.geom.LineString<G2D> route;
 	
 	@NotNull
-	private LocalDate departureTime;
+	private Timestamp departureTime;
 	
 	@NotNull
 	private long duration;
@@ -81,7 +83,7 @@ public class Ride {
 			Point o,
 			Point d,
 			LineString r,
-			LocalDate departureTime,
+			Timestamp departureTime,
 			long duration,
 			short seats,
 			User driver,
@@ -130,12 +132,12 @@ public class Ride {
 	public void setPassengers(Set<User> passengers) {
 		this.passengers = passengers;
 	}
-	public LocalDate getCreated() {
+	public Timestamp getCreated() {
 		return created;
 	}
 	
-	public LocalDate getUpdated() {
-		return updated;
+	public Timestamp getUpTimestampd() {
+		return upTimestampd;
 	}
 	
 	public org.geolatte.geom.Point<G2D> getOrigin() {
@@ -178,11 +180,11 @@ public class Ride {
 		this.route = WololoGeolatteConverter.toGeolatteLineString(r);
 	}
 
-	public LocalDate getDepartureTime() {
+	public Timestamp getDepartureTime() {
 		return departureTime;
 	}
 
-	public void setDepartureTime(LocalDate departureTime) {
+	public void setDepartureTime(Timestamp departureTime) {
 		this.departureTime = departureTime;
 	}
 

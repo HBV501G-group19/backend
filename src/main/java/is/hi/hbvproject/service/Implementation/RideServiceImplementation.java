@@ -1,6 +1,7 @@
 package is.hi.hbvproject.service.Implementation;
 import is.hi.hbvproject.service.RideService;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,8 +27,13 @@ public class RideServiceImplementation implements RideService {
 	}
 	
 	@Override
-	public List<Ride> findNearby(org.geolatte.geom.Point<G2D> origin, org.geolatte.geom.Point<G2D> destination) {
-		return rideRepository.findNearby(origin, destination);
+	public List<Ride> findNearby(
+		org.geolatte.geom.Polygon<G2D> origin,
+		org.geolatte.geom.Polygon<G2D> destination,
+		Timestamp minTime,
+		Timestamp maxTime
+	) {
+		return rideRepository.findNearby(origin, destination, minTime, maxTime);
 	};
 	
 	@Override

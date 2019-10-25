@@ -1,11 +1,8 @@
 package is.hi.hbvproject.controller;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import org.geolatte.geom.G2D;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,34 +11,105 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.wololo.geojson.LineString;
 import org.wololo.geojson.Point;
 import org.wololo.geojson.GeoJSONFactory;
 
-import is.hi.hbvproject.service.RideService;
-import is.hi.hbvproject.service.UserService;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
+
+import is.hi.hbvproject.service.RideService;
+import is.hi.hbvproject.service.UserService;
+import is.hi.hbvproject.utils.ORSUtils;
 import is.hi.hbvproject.persistence.entities.Ride;
 import is.hi.hbvproject.persistence.entities.User;
+
+class ConvinientRequestBody{
+	@JsonProperty("user_id")
+	long userId;
+	@JsonProperty("origin")
+	double[] origin;
+	@JsonProperty("destination")
+	double[] destination;
+	@JsonProperty("range")
+	double[] range;
+	@JsonProperty("departureTime")
+	Timestamp departureTime;
+	
+	public long getUserId() {
+		return userId;
+	}
+	
+	public List<double[]> getLocations() {
+		List<double[]> locations = new ArrayList<>();
+		locations.add(origin);
+		locations.add(destination);
+		return locations;
+	}
+	
+	public double[] getRange() {
+		return range;
+	}
+	
+	public void setDepartureTime(String time) {
+		departureTime = Timestamp.valueOf(time);
+	}
+	
+	public Timestamp getDepartureTime() {
+		return departureTime;
+	}
+}
+
+
 @RestController
 public class RideController {
 	RideService rideService;
 	UserService userService;
+	final String orsKey;
 	@Autowired
-	public RideController(RideService rideService, UserService userService) {
+	public RideController(@Value("${ors.key}") String orsKey, RideService rideService, UserService userService) {
 		this.rideService = rideService;
 		this.userService = userService;
+		this.orsKey = orsKey;
 	}
 	
 	@RequestMapping(
-			value = "/rides/{id}/dafdasfds",
-			method = RequestMethod.GET,
+			value = "/rides/convenient",
+			method = RequestMethod.POST,
 			produces = "application/json"
 	)
-	public List<Ride> getConvinientRides() {
+	public List<Ride> getConvinientRides(@RequestBody ConvinientRequestBody body) {
+		long userId = body.getUserId();
+		List<double[]> locations = body.getLocations();
+		Timestamp departureTime = body.getDepartureTime();
+		double[] range = body.getRange();
 		
-		return null;
+		Optional<User> user = userService.findById(userId);
+		if (!user.isPresent()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User id: " + userId + " not found");
+		}
+
+		List<org.geolatte.geom.Polygon<G2D>> isochrones = ORSUtils.getIsochrones(locations, range, orsKey);
+		
+		Timestamp minTimestamp = (Timestamp) departureTime.clone();
+		minTimestamp.setTime((departureTime.getTime() - 600000));
+		Timestamp maxTimestamp = (Timestamp) departureTime.clone();
+		maxTimestamp.setTime((departureTime.getTime() + 600000));
+
+		List<Ride> rides = rideService.findNearby(
+			isochrones.get(0),
+			isochrones.get(1),
+			minTimestamp,
+			maxTimestamp
+		);
+		return rides;
 	}
 	
 	@RequestMapping(
@@ -64,16 +132,6 @@ public class RideController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
 		}
 		return ride.get();
-	}
-	
-	@RequestMapping("/point")
-	public LineString point() {
-		double[][] d = {
-				{2.0, 3.5},
-				{2.5, 3},
-		};
-		LineString l = new LineString(d);
-		return l;
 	}
 	
 	@RequestMapping(
@@ -101,7 +159,7 @@ public class RideController {
 		LineString route = (LineString) GeoJSONFactory.create(routeJson.toString());
 		
 		String departureTimeJson = json.getString("departure_time");
-		LocalDate departureTime = LocalDate.parse(departureTimeJson);
+		Timestamp departureTime = Timestamp.valueOf(departureTimeJson);
 		
 		long duration = json.getLong("duration");
 		short seats = (short) json.getInt("seats");
