@@ -1,15 +1,21 @@
 package is.hi.hbvproject.service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
-import org.locationtech.jts.geom.Geometry;
+import org.geolatte.geom.G2D;
 
 import is.hi.hbvproject.persistence.entities.Ride;
 import is.hi.hbvproject.persistence.entities.User;
 
 public interface RideService {
-	List<Ride> findNearby(Geometry origin, Geometry destination);
+	List<Ride> findNearby(
+		org.geolatte.geom.Polygon<G2D> origin,
+		org.geolatte.geom.Polygon<G2D> destination,
+		Timestamp minTime,
+		Timestamp maxTime
+	);
 	void addPassenger(long rideId, User passenger);
 	void delete(Ride ride);
 	void deleteAll();

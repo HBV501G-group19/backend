@@ -30,8 +30,8 @@ The project comes prepackaged in a Maven wrapper. It can be run with
 
 * [x] Finna út úr hvernig það er hægt að bæta við passenger í ride
 * [ ] Setja upp endpoints fyrir user og ride
-  * [ ] GET á `/ride/` og `ride/{id}` til að ná í
-  * [ ] POST á `/ride` til þess að búa til nýtt
+  * [x] GET á `/ride/` og `ride/{id}` til að ná í
+  * [x] POST á `/ride` til þess að búa til nýtt
   * [ ] PATCH á `/ride/{id}` til þess að bæta við farþega og uppfærA
   * [x] GET á `/user/` og `/user/{id}` til að ná í
   * [x] POST á `/user` til að búa til
