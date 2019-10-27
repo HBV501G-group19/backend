@@ -1,7 +1,9 @@
 package is.hi.hbvproject.persistence.entities;
 
-import java.util.Date;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -13,23 +15,23 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Point;
-import javax.persistence.Transient;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
-import org.wololo.jts2geojson.GeoJSONWriter;
+import org.geolatte.geom.G2D;
+import org.wololo.geojson.Point;
+import org.wololo.geojson.LineString;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonRawValue;
+
+import is.hi.hbvproject.utils.WololoGeolatteConverter;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name = "ride")
+@Table(name = "rides")
 public class Ride {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,32 +48,28 @@ public class Ride {
 	private Set<User> passengers = new HashSet<>();
 	
 	@CreationTimestamp
-	private Date created;
+	private Timestamp created;
 	@UpdateTimestamp
-	private Date updated;
+	private Timestamp upTimestampd;
+	
 	
 	@NotNull
-	@JsonRawValue
 	@Column(columnDefinition = "geometry")
-	private Point origin;
+	private org.geolatte.geom.Point<G2D> origin;
 	
 	@NotNull
-	@JsonRawValue
 	@Column(columnDefinition = "geometry")
-	private Point destination;
+	private org.geolatte.geom.Point<G2D> destination;
 	
 	@NotNull
-	@JsonRawValue
 	@Column(columnDefinition = "geometry")
-	private LineString route;
-	
-	@Transient
-	@JsonIgnore
-	private GeoJSONWriter writer;
+	private org.geolatte.geom.LineString<G2D> route;
 	
 	@NotNull
-	private Date time;
-	private boolean isArrivalTime;
+	private Timestamp departureTime;
+	
+	@NotNull
+	private long duration;
 	
 	@NotNull
 	private short totalSeats;
@@ -80,24 +78,36 @@ public class Ride {
 	private short freeSeats;
 		
 	public Ride() {}
-	
-	public Ride(Point o, Point d, LineString r, Date time, boolean isArrivalTime, short seats, User driver) {
+
+	public Ride(
+			Point o,
+			Point d,
+			LineString r,
+			Timestamp departureTime,
+			long duration,
+			short seats,
+			User driver,
+			List<User> passengers
+	) {
 		this.driver = driver;
-		this.origin = o;
-		this.destination = d;
-		this.route = r;
-		this.time = time;
-		this.isArrivalTime = isArrivalTime;
+		this.departureTime= departureTime;
+		this.duration = duration;
 		this.totalSeats = seats;
 		this.freeSeats = seats;
+        
+		this.origin = WololoGeolatteConverter.toGeolattePoint(o);
+		this.destination = WololoGeolatteConverter.toGeolattePoint(d);
+		this.route = WololoGeolatteConverter.toGeolatteLineString(r);
+		
+		passengers.forEach(passenger -> this.addPassenger(passenger));
 	}
 	
 	public Long getId() {
 		return this.id;
 	}
 	
-	public User getDriver() {
-		return driver;
+	public long getDriver() {
+		return driver.getId();
 	}
 	
 	public void setDriver(User driver) {
@@ -105,82 +115,85 @@ public class Ride {
 	}
 	
 	public void addPassenger(User passenger) {
+		if (freeSeats == 0) {
+			throw new Error("No available space in ride");
+		}
 		this.passengers.add(passenger);
-		this.setFreeSeats(--freeSeats);
+		this.setFreeSeats((short)(freeSeats - 1));
 		passenger.getRides().add(this);
 	}
 	
-	public Set<User> getPassengers() {
-		return passengers;
+	public List<Long> getPassengers() {
+		List<Long> ids = new ArrayList<>();
+		passengers.forEach(passenger -> ids.add(passenger.getId()));
+		return ids;
 	}
 	
 	public void setPassengers(Set<User> passengers) {
 		this.passengers = passengers;
 	}
-	public Date getCreated() {
+	public Timestamp getCreated() {
 		return created;
 	}
 	
-	public Date getUpdated() {
-		return updated;
+	public Timestamp getUpTimestampd() {
+		return upTimestampd;
 	}
 	
-	public Point getOrigin() {
-		return origin;
+	public org.geolatte.geom.Point<G2D> getOrigin() {
+		return this.origin;
 	}
 	
 	@JsonGetter("origin")
-	public String getOriginJSON() {
-		this.writer = new GeoJSONWriter();
-		return writer.write(this.origin).toString();
+	public Point getOriginJson() {
+		return WololoGeolatteConverter.toWololoPoint(origin);
 	}
 
-	public void setOrigin(Point origin) {
-		this.origin = origin;
+	public void setOrigin(Point o) {
+		this.origin = WololoGeolatteConverter.toGeolattePoint(o);
 	}
 
-	public Point getDestination() {
-		return destination;
+	public org.geolatte.geom.Point<G2D> getDestination() {
+		return this.destination;
 	}
 	
 	@JsonGetter("destination")
-	public String getDestinationJSON() {
-		this.writer = new GeoJSONWriter();
-		return writer.write(this.destination).toString();
+	public Point getDestinationJson() {
+		return WololoGeolatteConverter.toWololoPoint(destination);
+	}
+	
+	public void setDestination(Point d) {
+		this.destination = WololoGeolatteConverter.toGeolattePoint(d);
+
 	}
 
-	public void setDestination(Point destination) {
-		this.destination = destination;
-	}
-
-	public LineString getRoute() {
-		return route;
+	public org.geolatte.geom.LineString<G2D> getRoute() {
+		return this.route;
 	}
 	
 	@JsonGetter("route")
-	public String getRouteJSON() {
-		this.writer = new GeoJSONWriter();
-		return writer.write(this.route).toString();
+	public LineString getRouteGeoJson() {
+		return WololoGeolatteConverter.toWololoLineString(route);
 	}
 
-	public void setRoute(LineString route) {
-		this.route = route;
+	public void setRoute(LineString r) {
+		this.route = WololoGeolatteConverter.toGeolatteLineString(r);
 	}
 
-	public Date getTime() {
-		return time;
+	public Timestamp getDepartureTime() {
+		return departureTime;
 	}
 
-	public void setTime(Date time) {
-		this.time = time;
+	public void setDepartureTime(Timestamp departureTime) {
+		this.departureTime = departureTime;
 	}
 
-	public boolean isArrivalTime() {
-		return isArrivalTime;
+	public long getDuration() {
+		return duration;
 	}
 
-	public void setArrivalTime(boolean isArrivalTime) {
-		this.isArrivalTime = isArrivalTime;
+	public void duration(long duration) {
+		this.duration = duration;
 	}
 	
 	public short getTotalSeats() {
@@ -195,8 +208,8 @@ public class Ride {
 		if (seats < 0) {
 			// handle
 			throw new Error("Trying to set less then 0 free seats");
-		} else if (seats > totalSeats) {
-			throw new Error("Trying to set more free seats then total seats");
+		} else if (seats > totalSeats | seats > freeSeats) {
+			throw new Error("Trying to set more free seats then available seats");
 		}
 		
 		freeSeats = seats;
