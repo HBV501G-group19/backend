@@ -1,4 +1,5 @@
 package is.hi.hbvproject.controller;
+
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,25 +24,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RestController
 public class UserController {
 	UserService service;
+	BCryptPasswordEncoder passwordEncoder;
+
 	@Autowired
-	public UserController(UserService service) {
+	public UserController(UserService service, BCryptPasswordEncoder passwordEncoder) {
 		this.service = service;
+		this.passwordEncoder = passwordEncoder;
 	}
-	
-	@RequestMapping(
-		value = "/users",
-		method = RequestMethod.GET,
-		produces = "application/json"
-	)
+
+	@RequestMapping(value = "/users", method = RequestMethod.GET, produces = "application/json")
 	public List<User> getUsers() {
 		return service.findAll();
 	}
-	
-	@RequestMapping(
-		value = "/users/{id}",
-		method = RequestMethod.GET,
-		produces = "application/json"
-	)
+
+	@RequestMapping(value = "/users/{id}", method = RequestMethod.GET, produces = "application/json")
 	public Optional<User> getUserById(@PathVariable long id) {
 		Optional<User> user = service.findById(id);
 		if (!user.isPresent()) {
@@ -48,20 +45,15 @@ public class UserController {
 		}
 		return user;
 	}
-	
-	@RequestMapping(
-		value = "/users/register",
-		method = RequestMethod.POST,
-		consumes = "application/json",
-		produces = "application/json"
-	)
-	public User createUser(
-		@RequestBody User user
-	) throws JsonParseException, JsonMappingException, IOException {
+
+	@RequestMapping(value = "/users/register", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	public User createUser(@RequestBody User user) throws JsonParseException, JsonMappingException, IOException {
 		if (service.existsByUsername(user.getUsername())) {
 			// ekki viss með þennan status kóða
 			throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User already exists");
 		}
+
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		service.save(user);
 		return user;
 	}
