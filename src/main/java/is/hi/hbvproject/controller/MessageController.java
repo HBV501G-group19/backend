@@ -1,28 +1,22 @@
 package is.hi.hbvproject.controller;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 import is.hi.hbvproject.persistence.entities.User;
 import is.hi.hbvproject.service.UserService;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class MessageController {
     MessageService messageService;
     UserService userService;
+    RideServices rideService;
+    AuthenticationService authenticationService;
+
     @Autowired
     public MessageController(UserService userService, MessageService messageService) {
         this.userService = userService;
@@ -61,17 +55,50 @@ public class MessageController {
     public Message createMessage(@RequestBody JSONObject body) {
         long senderId = body.getLong("senderId");
         Optional<User> sender = userService.findById(senderId);
-        if(!sender.isPresent()) {
+        if (!sender.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sender not found");
         }
         long recipientId = body.getLong("recipientId");
         Optional<User> recipient = userService.findById(recipientId);
-        if(!recipient.isPresent()) {
+        if (!recipient.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recpient not found");
         }
         String messageBody = body.getString("messageBody");
-        Message message = new Message(body,recipient,sender);
+        Message message = new Message(body, recipient, sender);
         messageService.save(message);
         return message;
     }
+
+    public Optional<Message> findMessageById(@PathVariable long id) {
+        Optional<Message> message = messageService.findById(id);
+        if (!message.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
+        }
+        return message;
+    }
+
+    public List<Message> findConversation(@PathVariable User sender, User recipient, Ride ride) {
+        List<Message> conversation = messageService.findConversation(sender, recipient, ride);
+        if (!conversation.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Conversation not found");
+        }
+        return conversation;
+    }
+
+    public List<Message> findSentMessage(@PathVariable User sender) {
+        List<Message> message = messageService.findSent(sender);
+        if (!message.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sender message not found");
+        }
+        return message;
+    }
+
+    public List<Message> findRecievedMessage(@PathVariable User recipient) {
+        List<Message> message = messageService.findRecieved(recipient);
+        if (!message.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipient message not found");
+        }
+        return message;
+    }
+
 }
