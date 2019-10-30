@@ -18,7 +18,7 @@ public interface MessageService {
 
     Optional<Message> findMessage(Long id);
 
-    List<Message> findMessage(Long senderId);
+    List<Message> findSent(Long senderId);
 
     List<Messages> findRecieved(long recipientId);
 }
