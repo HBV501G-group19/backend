@@ -1,30 +1,24 @@
 package is.hi.hbvproject.service;
 
 import is.hi.hbvproject.persistence.entities.Message;
+import is.hi.hbvproject.persistence.entities.Ride;
+import is.hi.hbvproject.persistence.entities.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface MessageService {
-    void delete(Message message);
+    Message save(Message message);
+
+    void delete(Message);
 
     void deleteAll();
 
-    long count();
+    List<Messages> findConversation(User sender, User recipient, Ride ride);
 
-    void deleteById(Long id);
+    Optional<Message> findMessage(Long id);
 
-    boolean existsById(Long id);
+    List<Message> findMessage(Long senderId);
 
-    boolean Message(String message);
-
-    List<Message> findAll();
-
-    List<Message> findAllById(Iterable<Long> ids);
-
-    Optional<Message> findById(Long id);
-
-    Message save(Message message);
-
-    void deleteAll(Iterable<? extends Message> messages);
+    List<Messages> findRecieved(long recipientId);
 }
