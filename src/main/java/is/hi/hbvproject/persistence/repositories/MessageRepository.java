@@ -10,15 +10,18 @@ import java.util.Optional;
 public interface MessageRepository extends JpaRepository<Message, Long> {
     public Message save(Message message);
 
-    public Optional<Message> findById(long id);
-
-    public Message deleteById(long id);
-
-    public boolean existsById(long id);
-
-    public boolean existsByUsername(String username);
-
-    public void deleteAll(Iterable<? extends Messages> messages);
+    public void delete(Message);
 
     public void deleteAll();
+
+    long count();
+
+    public Optional<Message> findById(long id);
+
+    public List<Message> findSentMessages(long senderId);
+
+    public List<Message> findRecievedMessage(long recipientId);
+
+    public List<Message> findConversation(long senderId, long recipientId, long rideId);
+    
 }
