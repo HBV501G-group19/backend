@@ -23,23 +23,21 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     long count();
 
     public Optional<Message> findById(long id);
-
-    @Query(value = "select m from Message m where m.sender = senderId" +
-            "and m.recipient = recipientId" +
-            "and m.ride = rideId")
+    //select sender as s, recipient as rec, ride as r
+    @Query(value = "select m from Message m " +
+            "where m.sender.id = :senderId " +
+            "and m.recipient.id = :recipientId " +
+            "and m.ride.id = :rideId")
     public List<Message> findConversation(
             @Param("senderId") long senderId,
             @Param("recipientId") long recipientId,
             @Param("rideId") long rideId
     );
 
-    @Query(value = "select m from Message m where m.id = id")
-    public Optional<Message> findMessage( @Param("id") long id );
+    public Optional<Message> findMessageById(long id);
 
-    @Query(value = "select s from Message m where s.id = id")
-    public List<Message> findSent( @Param("id") long sentId );
+    public List<Message> findBySender(User sender);
 
-    @Query(value = "select r from Message m where r.id = id")
-    public List<Message> findRecieved( @Param("id") long recievedId );
+    public List<Message> findByRecipient(User recipient );
 
 }
