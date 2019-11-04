@@ -24,7 +24,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     public Optional<Message> findById(long id);
 
-    @Query("select m from Messages where m.sender = senderId" +
+    @Query(value = "select m from Message m where m.sender = senderId" +
             "and m.recipient = recipientId" +
             "and m.ride = rideId")
     public List<Message> findConversation(
@@ -33,13 +33,13 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             @Param("rideId") long rideId
     );
 
-    @Query("select m from Messages where m.id = id")
+    @Query(value = "select m from Message m where m.id = id")
     public Optional<Message> findMessage( @Param("id") long id );
 
-    @Query("select s from Messages where s.id = id")
+    @Query(value = "select s from Message m where s.id = id")
     public List<Message> findSent( @Param("id") long sentId );
 
-    @Query("select r from Messages where r.id = id")
+    @Query(value = "select r from Message m where r.id = id")
     public List<Message> findRecieved( @Param("id") long recievedId );
 
 }
