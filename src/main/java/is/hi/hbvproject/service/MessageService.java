@@ -10,15 +10,15 @@ import java.util.Optional;
 public interface MessageService {
     Message save(Message message);
 
-    void delete(Message);
+    void delete(Message message);
 
     void deleteAll();
 
-    List<Messages> findConversation(User sender, User recipient, Ride ride);
+    List<Message> findConversation(long sender, long recipient, long ride);
 
-    Optional<Message> findMessage(Long id);
+    Optional<Message> findMessage(long id);
 
-    List<Message> findSent(Long senderId);
+    List<Message> findSent(long senderId);
 
-    List<Messages> findRecieved(long recipientId);
+    List<Message> findRecieved(long recipientId);
 }

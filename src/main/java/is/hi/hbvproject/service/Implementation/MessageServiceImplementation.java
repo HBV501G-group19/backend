@@ -1,8 +1,16 @@
 package is.hi.hbvproject.service.Implementation;
 
+
 import is.hi.hbvproject.persistence.entities.Message;
+import is.hi.hbvproject.persistence.entities.Ride;
+import is.hi.hbvproject.persistence.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import is.hi.hbvproject.service.MessageService;
+import is.hi.hbvproject.persistence.repositories.RideRepository;
+import is.hi.hbvproject.persistence.repositories.UserRepository;
+import is.hi.hbvproject.persistence.repositories.MessageRepository;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -31,64 +39,36 @@ public class MessageServiceImplementation implements MessageService {
 
     ;
 
-    @Override
-    public long count() {
-        return messageRepository.count();
-    }
-
-    ;
-
-    @Override
-    public void deleteById(Long id) {
-        messageRepository.deleteById(id);
-    }
-
-    ;
-
-    @Override
-    public boolean existsById(Long id) {
-        return messageRepository.existsById(id);
-    }
-
-    ;
-
-    @Override
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
-    }
-
-    @Override
-    public List<Message> findAll() {
-        return messageRepository.findAll();
-    }
-
-    ;
-
-    @Override
-    public List<Message> findAllById(Iterable<Long> ids) {
-        return messageRepository.findAllById(ids);
-    }
-
-    ;
-
-    @Override
-    public Optional<Message> findById(Long id) {
-        return messageRepository.findById(id);
-    }
-
-    ;
 
     @Override
     public Message save(Message message) {
-        return messageRepository.save(Message);
+        return messageRepository.save(message);
     }
 
     ;
 
     @Override
-    public void deleteAll(Iterable<? extends Message> messages) {
-        messageRepository.deleteAll(messages);
+    public List<Message> findConversation(long sender, long recipient, long ride)
+    {
+        return messageRepository.findConversation(sender, recipient, ride);
     }
 
-    ;
+    @Override
+    public Optional<Message> findMessage(long id)
+    {
+        return messageRepository.findMessage(id);
+    }
+
+    @Override
+    public List<Message> findSent(long senderId)
+    {
+        return messageRepository.findSent(senderId);
+    }
+
+    @Override
+    public List<Message> findRecieved(long recipientId)
+    {
+        return messageRepository.findRecieved(recipientId);
+    }
+
 }
