@@ -23,36 +23,15 @@ public class MessageController {
     RideService rideService;
 
     @Autowired
-    public MessageController(UserService userService, MessageService messageService) {
+    public MessageController(UserService userService, MessageService messageService, RideService rideService) {
         this.userService = userService;
         this.messageService = messageService;
+        this.rideService = rideService;
     }
 
 
     @RequestMapping(
-            value = "/users",
-            method = RequestMethod.GET,
-            produces = "application/json"
-    )
-    public List<User> getUsers() {
-        return userService.findAll();
-    }
-
-    @RequestMapping(
-            value = "/users/{id}",
-            method = RequestMethod.GET,
-            produces = "application/json"
-    )
-    public Optional<User> getUserById(@PathVariable long id) {
-        Optional<User> user = userService.findById(id);
-        if (!user.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-        return user;
-    }
-
-    @RequestMapping(
-            value = "/messages",
+            value = "/messages/create",
             method = RequestMethod.POST,
             consumes = "application/json",
             produces = "application/json"
@@ -86,7 +65,7 @@ public class MessageController {
     }
 
     @RequestMapping(
-            value = "/message/{id}",
+            value = "/messages/{id}",
             method = RequestMethod.GET,
             produces = "application/json"
     )
@@ -118,7 +97,7 @@ public class MessageController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "RecipientId not found");
         }
 
-        Long rideId = json.getLong("senderId");
+        Long rideId = json.getLong("rideId");
         if(!rideService.existsById(rideId))
         {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "rideId not found");
@@ -129,22 +108,30 @@ public class MessageController {
     }
 
     @RequestMapping(
-            value = "/users/{id}/sent",
+            value = "/users/{senderId}/sent",
             method = RequestMethod.GET,
             produces = "application/json"
     )
-    public List<Message> findSentMessage(@PathVariable long sender) {
-        List<Message> message = messageService.findSent(sender);
+    public List<Message> findSentMessage(@PathVariable long senderId) {
+        Optional<User> sender = userService.findById(senderId);
+        if(!sender.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        List<Message> message = messageService.findSent(sender.get());
         return message;
     }
 
     @RequestMapping(
-            value = "/users/{id}/recieved",
+            value = "/users/{recipientId}/recieved",
             method = RequestMethod.GET,
             produces = "application/json"
     )
-    public List<Message> findRecievedMessage(@PathVariable long recipient) {
-        List<Message> message = messageService.findRecieved(recipient);
+    public List<Message> findRecievedMessage(@PathVariable long recipientId) {
+        Optional<User> recipient = userService.findById(recipientId);
+        if(!recipient.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        List<Message> message = messageService.findRecieved(recipient.get());
         return message;
     }
 

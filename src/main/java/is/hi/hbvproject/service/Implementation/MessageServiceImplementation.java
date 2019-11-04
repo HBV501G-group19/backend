@@ -56,19 +56,19 @@ public class MessageServiceImplementation implements MessageService {
     @Override
     public Optional<Message> findMessage(long id)
     {
-        return messageRepository.findMessage(id);
+        return messageRepository.findMessageById(id);
     }
 
     @Override
-    public List<Message> findSent(long senderId)
+    public List<Message> findSent(User sender)
     {
-        return messageRepository.findSent(senderId);
+        return messageRepository.findBySender(sender);
     }
 
     @Override
-    public List<Message> findRecieved(long recipientId)
+    public List<Message> findRecieved(User recipient)
     {
-        return messageRepository.findRecieved(recipientId);
+        return messageRepository.findByRecipient(recipient);
     }
 
 }
