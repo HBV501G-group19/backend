@@ -5,17 +5,13 @@ import is.hi.hbvproject.service.UserService;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import is.hi.hbvproject.persistence.entities.User;
 import is.hi.hbvproject.persistence.repositories.UserRepository;
 
-import static java.util.Collections.emptyList;
 
 @Service
-public class UserServiceImplementation implements UserService, UserDetailsService {
+public class UserServiceImplementation implements UserService {
 
 	UserRepository userRepository;
 
@@ -80,12 +76,7 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
 	};
 
 	@Override
-	public UserDetails loadUserByUsername(String username) {
-		Optional<User> user = userRepository.findByUsername(username);
-		if (!user.isPresent()) {
-			throw new UsernameNotFoundException(username);
-		}
-		return new org.springframework.security.core.userdetails.User(user.get().getUsername(), user.get().getPassword(),
-				emptyList());
+	public Optional<User> findByUsername(String username) {
+		return userRepository.findByUsername(username);
 	}
 }
