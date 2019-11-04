@@ -1,10 +1,17 @@
 package is.hi.hbvproject.persistence.entities;
 
+import is.hi.hbvproject.persistence.entities.User;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.GeneratedValue;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
 
 @Entity
-@Table(name = "messages") // "user" is a reserved word in postgres
+@Table(name = "messages")
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +24,8 @@ public class Message {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     private User sender;
-
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
     private Ride ride;
 
     public Message() {
@@ -56,10 +64,6 @@ public class Message {
 
     public void setBody(String body) {
         this.body = body;
-    }
-
-    public Ride getBody() {
-        return ride;
     }
 
     public void setRide(Ride ride) {
