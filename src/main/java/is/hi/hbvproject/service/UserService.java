@@ -18,4 +18,5 @@ public interface UserService {
 	User save(User user);
 	void deleteAll(Iterable<? extends User> users);
 	Optional<User> findByUsername(String username);
+	Optional<Long> findId(String username);
 }
