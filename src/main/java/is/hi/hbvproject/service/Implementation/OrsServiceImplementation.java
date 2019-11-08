@@ -1,27 +1,44 @@
-package is.hi.hbvproject.utils;
+package is.hi.hbvproject.service.Implementation;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.geolatte.geom.G2D;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.FeatureCollection;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.geojson.Polygon;
 
+import is.hi.hbvproject.service.OrsService;
 import is.hi.hbvproject.utils.WololoGeolatteConverter;
+import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
+import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
 
-public class ORSUtils{	
-	public static List<org.geolatte.geom.Polygon<G2D>> getIsochrones(List<double[]> locations, double[] range, String apiKey) {
+@Service
+public class OrsServiceImplementation implements OrsService {
+  @Value("${ors_key}") 
+  private String apiKey;
+
+  @Value("${ors_baseurl}")
+  private String baseUrl;
+
+  @Autowired
+  public OrsServiceImplementation() {}
+
+	@Override
+	public List<org.geolatte.geom.Polygon<G2D>> getIsochrones(JSONArray locations, JSONArray range) {
 		JSONObject isochroneJSON = new JSONObject();
 		isochroneJSON.put("locations", locations);
 		isochroneJSON.put("range", range);
-				
-		JSONObject response = Unirest.post("https://api.openrouteservice.org/v2/isochrones/foot-walking")
+
+		JSONObject response = Unirest.post(baseUrl + "/v2/isochrones/foot-walking")
 			      .header("Authorization", apiKey)
 			      .header("Content-type", "application/json")
 			      .header("mode", "no-cors")
@@ -53,4 +70,22 @@ public class ORSUtils{
 		
 		return isochrones;
 	}
+
+	@Override
+	public FeatureCollection getGeoCodes(String param) {
+		String geocode = param.trim().replace(" ", "%20");
+		String boundary = "boundary.country=is";
+    String api = "api_key=" + apiKey;
+    try {
+    JsonNode response = Unirest.post(baseUrl + "/geocode/search?" + api + "&text=" + geocode + "&" + boundary)
+    .header("mode", "no-cors")
+    .accept("application/json")
+    .asJson().getBody();
+    
+    FeatureCollection features = (FeatureCollection) GeoJSONFactory.create(response.toString());
+    return features;
+    } catch (Exception e) {
+      throw e;
+    }
+  }
 }
