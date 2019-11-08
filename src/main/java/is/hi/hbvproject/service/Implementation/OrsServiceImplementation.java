@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.FeatureCollection;
 import org.wololo.geojson.GeoJSONFactory;
+import org.wololo.geojson.Point;
 import org.wololo.geojson.Polygon;
 
 import is.hi.hbvproject.service.OrsService;
@@ -37,6 +38,7 @@ public class OrsServiceImplementation implements OrsService {
 		JSONObject isochroneJSON = new JSONObject();
 		isochroneJSON.put("locations", locations);
 		isochroneJSON.put("range", range);
+
 
 		JSONObject response = Unirest.post(baseUrl + "/v2/isochrones/foot-walking")
 			      .header("Authorization", apiKey)
@@ -77,8 +79,7 @@ public class OrsServiceImplementation implements OrsService {
 		String boundary = "boundary.country=is";
     String api = "api_key=" + apiKey;
     try {
-    JsonNode response = Unirest.post(baseUrl + "/geocode/search?" + api + "&text=" + geocode + "&" + boundary)
-    .header("mode", "no-cors")
+    JsonNode response = Unirest.get(baseUrl + "/geocode/search?" + api + "&text=" + geocode + "&" + boundary)
     .accept("application/json")
     .asJson().getBody();
     
@@ -87,5 +88,54 @@ public class OrsServiceImplementation implements OrsService {
     } catch (Exception e) {
       throw e;
     }
-  }
+	}
+	
+	@Override
+	public FeatureCollection getDirections(Point origin, Point destination, String profile) {
+		JSONArray coordinates = new JSONArray();
+		JSONObject body = new JSONObject();
+
+		double[] originCoordsArray = origin.getCoordinates();
+		JSONArray originCoords = new JSONArray();
+		
+		// Need to do this because the geocode API(which will provide most of these coords)
+		// is inconsistent with lat/long or long/lat format
+		if (originCoordsArray[0] < 0) {
+			originCoords.put(originCoordsArray[0]);
+			originCoords.put(originCoordsArray[1]);
+		} else {
+			originCoords.put(originCoordsArray[1]);
+			originCoords.put(originCoordsArray[0]);
+		}
+
+		double[] destinationCoordsArray = destination.getCoordinates();
+		JSONArray destinationCoords = new JSONArray();
+		
+		if (originCoordsArray[0] < 0) {
+			destinationCoords.put(destinationCoordsArray[0]);
+			destinationCoords.put(destinationCoordsArray[1]);
+		} else {
+			destinationCoords.put(destinationCoordsArray[1]);
+			destinationCoords.put(destinationCoordsArray[0]);
+		}
+
+		coordinates.put(originCoords);
+		coordinates.put(destinationCoords);
+		body.put("coordinates", coordinates);
+		// Makes sure we don't get unnecessary info
+		body.put("instructions", false);
+		body.put("preference", "recommended");
+
+		JsonNode response = Unirest.post
+			(baseUrl + "/v2/directions/" + profile + "/geojson")
+			.header("Authorization", apiKey)
+			.header("Content-type", "application/json")
+			.accept("application/json, application/geo+json")
+			.body(body)
+			.asJson()
+			.getBody();
+
+		FeatureCollection features = (FeatureCollection) GeoJSONFactory.create(response.toString());
+		return features;
+	}
 }
