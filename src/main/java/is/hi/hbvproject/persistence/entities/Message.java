@@ -8,7 +8,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.GeneratedValue;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
+import com.fasterxml.jackson.annotation.JsonGetter;
 
 @Entity
 @Table(name = "messages")
@@ -42,6 +42,11 @@ public class Message {
         return recipient;
     }
 
+    @JsonGetter("recipient")
+    public long getRecipientId() {
+        return recipient.getId();
+    }
+
     public void setRecipient(User recipient) {
         this.recipient = recipient;
     }
@@ -50,6 +55,10 @@ public class Message {
         return sender;
     }
 
+    @JsonGetter("sender")
+    public long getSenderId() {
+        return sender.getId();
+    }
     public void setSender(User sender) {
         this.sender = sender;
     }
@@ -64,6 +73,15 @@ public class Message {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public Ride getRide() {
+        return ride;
+    }
+
+    @JsonGetter("ride")
+    public long getRideId() {
+        return ride.getId();
     }
 
     public void setRide(Ride ride) {
