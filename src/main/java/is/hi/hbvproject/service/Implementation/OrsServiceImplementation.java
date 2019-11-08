@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.FeatureCollection;
 import org.wololo.geojson.GeoJSONFactory;
+import org.wololo.geojson.Point;
 import org.wololo.geojson.Polygon;
 
 import is.hi.hbvproject.service.OrsService;
@@ -37,6 +38,7 @@ public class OrsServiceImplementation implements OrsService {
 		JSONObject isochroneJSON = new JSONObject();
 		isochroneJSON.put("locations", locations);
 		isochroneJSON.put("range", range);
+
 
 		JSONObject response = Unirest.post(baseUrl + "/v2/isochrones/foot-walking")
 			      .header("Authorization", apiKey)
@@ -77,8 +79,7 @@ public class OrsServiceImplementation implements OrsService {
 		String boundary = "boundary.country=is";
     String api = "api_key=" + apiKey;
     try {
-    JsonNode response = Unirest.post(baseUrl + "/geocode/search?" + api + "&text=" + geocode + "&" + boundary)
-    .header("mode", "no-cors")
+    JsonNode response = Unirest.get(baseUrl + "/geocode/search?" + api + "&text=" + geocode + "&" + boundary)
     .accept("application/json")
     .asJson().getBody();
     
@@ -121,7 +122,6 @@ public class OrsServiceImplementation implements OrsService {
 
 		coordinates.put(originCoords);
 		coordinates.put(destinationCoords);
-
 		body.put("coordinates", coordinates);
 		// Makes sure we don't get unnecessary info
 		body.put("instructions", false);
