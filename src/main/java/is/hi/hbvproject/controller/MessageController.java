@@ -8,9 +8,12 @@ import is.hi.hbvproject.service.RideService;
 import is.hi.hbvproject.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Optional;
 
@@ -115,7 +118,7 @@ public class MessageController {
     public List<Message> getSentMessage(@PathVariable long senderId) {
         Optional<User> sender = userService.findById(senderId);
         if(!sender.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id: " + senderId + ", not found");
         }
         List<Message> message = messageService.findSent(sender.get());
         return message;
@@ -129,10 +132,17 @@ public class MessageController {
     public List<Message> getRecievedMessage(@PathVariable long recipientId) {
         Optional<User> recipient = userService.findById(recipientId);
         if(!recipient.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id: " + recipientId + ", not found");
         }
         List<Message> message = messageService.findRecieved(recipient.get());
         return message;
     }
 
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> responseStatusHandler(Exception e) {
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("error", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
+
+    }
 }
