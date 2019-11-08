@@ -2,7 +2,6 @@ package is.hi.hbvproject.controller;
 
 import org.geolatte.geom.G2D;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,10 +23,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
-
+import is.hi.hbvproject.service.OrsService;
 import is.hi.hbvproject.service.RideService;
 import is.hi.hbvproject.service.UserService;
-import is.hi.hbvproject.utils.ORSUtils;
 import is.hi.hbvproject.persistence.entities.Ride;
 import is.hi.hbvproject.persistence.entities.User;
 
@@ -72,45 +70,47 @@ class ConvinientRequestBody{
 public class RideController {
 	RideService rideService;
 	UserService userService;
-	final String orsKey;
+	OrsService orsService;
+	
 	@Autowired
-	public RideController(@Value("${ors.key}") String orsKey, RideService rideService, UserService userService) {
+	public RideController(RideService rideService, UserService userService, OrsService orsService){
 		this.rideService = rideService;
 		this.userService = userService;
-		this.orsKey = orsKey;
+		this.orsService = orsService;
 	}
-	
+
 	@RequestMapping(
-			value = "/rides/convenient",
-			method = RequestMethod.POST,
-			produces = "application/json"
-	)
-	public List<Ride> getConvinientRides(@RequestBody ConvinientRequestBody body) {
-		long userId = body.getUserId();
-		List<double[]> locations = body.getLocations();
-		Timestamp departureTime = body.getDepartureTime();
-		double[] range = body.getRange();
-		
-		Optional<User> user = userService.findById(userId);
-		if (!user.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id: " + userId + " not found");
-		}
+		value = "/rides/convenient",
+		method = RequestMethod.POST,
+		consumes = "application/json",
+		produces = "application/json"
+)
+public List<Ride> getConvinientRides(@RequestBody String json) {
+	JSONObject body = new JSONObject(json);
+	// probably wanna do some error checking/handling here
+	JSONObject origin = body.getJSONObject("origin");
+	JSONObject destination = body.getJSONObject("destination");
+	Timestamp departureTime = Timestamp.valueOf(body.getString("departure_time"));
+	JSONArray range = body.getJSONArray("range");
 
-		List<org.geolatte.geom.Polygon<G2D>> isochrones = ORSUtils.getIsochrones(locations, range, orsKey);
-		
-		Timestamp minTimestamp = (Timestamp) departureTime.clone();
-		minTimestamp.setTime((departureTime.getTime() - 600000));
-		Timestamp maxTimestamp = (Timestamp) departureTime.clone();
-		maxTimestamp.setTime((departureTime.getTime() + 600000));
+	JSONArray locations = new JSONArray();
+	locations.put(origin.getJSONArray("coordinates"));
+	locations.put(destination.getJSONArray("coordinates"));
+	List<org.geolatte.geom.Polygon<G2D>> isochrones = orsService.getIsochrones(locations, range);
+	
+	Timestamp minTimestamp = (Timestamp) departureTime.clone();
+	minTimestamp.setTime((departureTime.getTime() - 600000));
+	Timestamp maxTimestamp = (Timestamp) departureTime.clone();
+	maxTimestamp.setTime((departureTime.getTime() + 600000));
 
-		List<Ride> rides = rideService.findNearby(
-			isochrones.get(0),
-			isochrones.get(1),
-			minTimestamp,
-			maxTimestamp
-		);
-		return rides;
-	}
+	List<Ride> rides = rideService.findNearby(
+		isochrones.get(0),
+		isochrones.get(1),
+		minTimestamp,
+		maxTimestamp
+	);
+	return rides;
+}
 	
 	@RequestMapping(
 		value = "/rides",
