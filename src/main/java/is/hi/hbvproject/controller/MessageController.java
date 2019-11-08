@@ -69,7 +69,7 @@ public class MessageController {
             method = RequestMethod.GET,
             produces = "application/json"
     )
-    public Optional<Message> findMessageById(@PathVariable long id) {
+    public Optional<Message> getMessageById(@PathVariable long id) {
         Optional<Message> message = messageService.findMessage(id);
         if (!message.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
@@ -82,7 +82,7 @@ public class MessageController {
             method = RequestMethod.POST,
             produces = "application/json"
     )
-    public List<Message> findConversation(@RequestBody String body) {
+    public List<Message> getConversation(@RequestBody String body) {
         JSONObject json = new JSONObject(body);
         Long senderId = json.getLong("senderId");
 
@@ -112,7 +112,7 @@ public class MessageController {
             method = RequestMethod.GET,
             produces = "application/json"
     )
-    public List<Message> findSentMessage(@PathVariable long senderId) {
+    public List<Message> getSentMessage(@PathVariable long senderId) {
         Optional<User> sender = userService.findById(senderId);
         if(!sender.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -126,7 +126,7 @@ public class MessageController {
             method = RequestMethod.GET,
             produces = "application/json"
     )
-    public List<Message> findRecievedMessage(@PathVariable long recipientId) {
+    public List<Message> getRecievedMessage(@PathVariable long recipientId) {
         Optional<User> recipient = userService.findById(recipientId);
         if(!recipient.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
