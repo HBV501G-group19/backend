@@ -39,6 +39,7 @@ public class OrsServiceImplementation implements OrsService {
 		isochroneJSON.put("locations", locations);
 		isochroneJSON.put("range", range);
 
+
 		JSONObject response = Unirest.post(baseUrl + "/v2/isochrones/foot-walking")
 			      .header("Authorization", apiKey)
 			      .header("Content-type", "application/json")
@@ -78,8 +79,7 @@ public class OrsServiceImplementation implements OrsService {
 		String boundary = "boundary.country=is";
     String api = "api_key=" + apiKey;
     try {
-    JsonNode response = Unirest.post(baseUrl + "/geocode/search?" + api + "&text=" + geocode + "&" + boundary)
-    .header("mode", "no-cors")
+    JsonNode response = Unirest.get(baseUrl + "/geocode/search?" + api + "&text=" + geocode + "&" + boundary)
     .accept("application/json")
     .asJson().getBody();
     

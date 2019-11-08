@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.geojson.Point;
 import org.wololo.geojson.Feature;
+import org.wololo.geojson.FeatureCollection;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -33,8 +34,8 @@ public class OrsController {
     method = RequestMethod.GET,
     produces = "application/json"
   )
-  public String getGeoCodes(@RequestParam(value = "geocode") String geoCode) {
-    return orsService.getGeoCodes(geoCode).toString();
+  public FeatureCollection getGeoCodes(@RequestParam(value = "geocode") String geoCode) {
+    return orsService.getGeoCodes(geoCode);
   }
 
   @RequestMapping(
