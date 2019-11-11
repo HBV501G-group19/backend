@@ -192,5 +192,36 @@ public class RideController {
 		rideService.save(ride);
 		return ride;
 	}
+
+	@RequestMapping(
+			value = "/rides/addpassenger",
+			method = RequestMethod.PATCH,
+			produces = "application/json"
+	)
+	public Ride addPassenger(@RequestBody String body) {
+		JSONObject json = new JSONObject(body);
+		long passengerId = json.getLong("passengerId");
+		Optional<User> findPassenger = userService.findById(passengerId);
+		if(!findPassenger.isPresent()){
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Passenger " + passengerId + " not found");
+		}
+		User passenger = findPassenger.get();
+
+		long rideId = json.getLong("rideId");
+		Optional<Ride> findRide = rideService.findById(rideId);
+		if (!findRide.isPresent()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride "+ rideId +"not found");
+		}
+		Ride ride = findRide.get();
+
+		if(ride.getDriver() == passengerId){
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Driver cannot be added as Passenger");
+		}
+
+		ride.addPassenger(passenger);
+		rideService.save(ride);
+
+		return ride;
+	}
 	
 }
