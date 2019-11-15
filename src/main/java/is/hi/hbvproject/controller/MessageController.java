@@ -49,7 +49,7 @@ public class MessageController {
         long recipientId = json.getLong("recipientId");
         Optional<User> recipient = userService.findById(recipientId);
         if (!recipient.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Recpient not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Recipient not found");
         }
         long rideId = json.getLong("rideId");
         Optional<Ride> ride = rideService.findById(rideId);
@@ -125,11 +125,11 @@ public class MessageController {
     }
 
     @RequestMapping(
-            value = "/users/{recipientId}/recieved",
+            value = "/users/{recipientId}/received",
             method = RequestMethod.GET,
             produces = "application/json"
     )
-    public List<Message> getRecievedMessage(@PathVariable long recipientId) {
+    public List<Message> getReceivedMessage(@PathVariable long recipientId) {
         Optional<User> recipient = userService.findById(recipientId);
         if(!recipient.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id: " + recipientId + ", not found");
@@ -137,6 +137,31 @@ public class MessageController {
         List<Message> message = messageService.findRecieved(recipient.get());
         return message;
     }
+
+    @RequestMapping(
+            value = "/Messages/driver-conversations/{rideId}",
+            method = RequestMethod.GET,
+            produces = "application/json"
+    )
+    public List<Object> getDriverConversation(@PathVariable long rideId) {
+        if(!rideService.existsById(rideId))
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "rideId not found");
+        }
+        Optional<Ride> rideOP = rideService.findById(rideId);
+        Ride ride = rideOP.get();
+
+        for (long p: ride.getPassengers()) {
+            /*
+            convObject.add(p, messageService.findConversation(ride.getDriver(), p, rideId)
+             */
+        }
+
+        //List<Message> conversation = messageService.findConversation(senderId, recipientId, rideId);
+
+        //    List<Message> findConversation(long sender, long recipient, long ride);
+    }
+
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, Object>> responseStatusHandler(Exception e) {
