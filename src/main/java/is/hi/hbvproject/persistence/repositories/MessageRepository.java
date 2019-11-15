@@ -26,9 +26,9 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     //select sender as s, recipient as rec, ride as r
     @Query(value = "select m from Message m " +
             "where m.sender.id = :senderId " +
-            "or m.sender.id = :recipientId " +
             "and m.recipient.id = :recipientId " +
-            "or m.recipient.id = :senderId " +
+            "or m.sender.id = :recipientId " +
+            "and m.recipient.id = :senderId " +
             "and m.ride.id = :rideId " +
             "order by m.created")
     public List<Message> findConversation(

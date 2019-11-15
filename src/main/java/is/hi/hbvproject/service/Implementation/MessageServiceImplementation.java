@@ -66,7 +66,7 @@ public class MessageServiceImplementation implements MessageService {
     }
 
     @Override
-    public List<Message> findRecieved(User recipient)
+    public List<Message> findReceived(User recipient)
     {
         return messageRepository.findByRecipient(recipient);
     }

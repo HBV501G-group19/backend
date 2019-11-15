@@ -1,5 +1,6 @@
 package is.hi.hbvproject.controller;
 
+import is.hi.hbvproject.models.responseObjects.ConversationResponse;
 import is.hi.hbvproject.persistence.entities.User;
 import is.hi.hbvproject.persistence.entities.Message;
 import is.hi.hbvproject.persistence.entities.Ride;
@@ -12,10 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import kong.unirest.json.JSONObject;
 
@@ -87,20 +85,20 @@ public class MessageController {
     )
     public List<Message> getConversation(@RequestBody String body) {
         JSONObject json = new JSONObject(body);
-        Long senderId = json.getLong("senderId");
+        long senderId = json.getLong("senderId");
 
         if(!userService.existsById(senderId))
         {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "SenderId not found");
         }
 
-        Long recipientId = json.getLong("recipientId");
+        long recipientId = json.getLong("recipientId");
         if(!userService.existsById(recipientId))
         {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "RecipientId not found");
         }
 
-        Long rideId = json.getLong("rideId");
+        long rideId = json.getLong("rideId");
         if(!rideService.existsById(rideId))
         {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "rideId not found");
@@ -134,32 +132,33 @@ public class MessageController {
         if(!recipient.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id: " + recipientId + ", not found");
         }
-        List<Message> message = messageService.findRecieved(recipient.get());
+        List<Message> message = messageService.findReceived(recipient.get());
         return message;
     }
 
     @RequestMapping(
             value = "/Messages/driver-conversations/{rideId}",
-            method = RequestMethod.GET,
+            method = RequestMethod.POST,
             produces = "application/json"
     )
-    public List<Object> getDriverConversation(@PathVariable long rideId) {
-        if(!rideService.existsById(rideId))
-        {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "rideId not found");
-        }
+    public List<ConversationResponse> getRideConversation(@PathVariable long rideId, @RequestBody String driver) {
+        JSONObject json = new JSONObject(driver);
+        long driverId = json.getLong("driverId");
         Optional<Ride> rideOP = rideService.findById(rideId);
-        Ride ride = rideOP.get();
-
-        for (long p: ride.getPassengers()) {
-            /*
-            convObject.add(p, messageService.findConversation(ride.getDriver(), p, rideId)
-             */
+        if(!rideOP.isPresent())
+        {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride not found");
         }
-
-        //List<Message> conversation = messageService.findConversation(senderId, recipientId, rideId);
-
-        //    List<Message> findConversation(long sender, long recipient, long ride);
+        Ride ride = rideOP.get();
+        if(ride.getDriver() != driverId){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong driver sent");
+        }
+        List<ConversationResponse> conversation = new ArrayList<>();
+        for (long p: ride.getPassengers()) {
+            ConversationResponse cr = new ConversationResponse(p,(messageService.findConversation(driverId, p, rideId)));
+            conversation.add(cr);
+        }
+        return conversation;
     }
 
 
