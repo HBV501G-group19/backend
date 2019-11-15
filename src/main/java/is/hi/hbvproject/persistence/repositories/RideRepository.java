@@ -18,7 +18,8 @@ import org.geolatte.geom.G2D;
 public interface RideRepository extends JpaRepository<Ride, Long>{
 	@Query(value = "select r from Ride r where within(r.origin, :origin) = true "
 			+ "and within(r.destination, :destination) = true "
-			+ "and r.departureTime > :min_time and r.departureTime < :max_time")
+			+ "and r.departureTime > :min_time and r.departureTime < :max_time"
+			+ "and r.freeseats > 0")
 	List<Ride> findNearby(
 		@Param("origin") org.geolatte.geom.Polygon<G2D> origin, 
 		@Param("destination") org.geolatte.geom.Polygon<G2D> destination,

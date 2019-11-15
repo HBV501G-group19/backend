@@ -87,17 +87,12 @@ public class RideController {
 )
 public List<Ride> getConvinientRides(@RequestBody String json) {
 	JSONObject body = new JSONObject(json);
+
 	// probably wanna do some error checking/handling here
-	long userId = body.getLong("user_id");
 	JSONObject origin = body.getJSONObject("origin");
 	JSONObject destination = body.getJSONObject("destination");
-	Timestamp departureTime = Timestamp.valueOf(body.getString("departure_time"));
+	Timestamp departureTime = Timestamp.valueOf(body.getString("departureTime"));
 	JSONArray range = body.getJSONArray("range");
-	
-	Optional<User> user = userService.findById(userId);
-	if (!user.isPresent()) {
-		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User id: " + userId + " not found");
-	}
 
 	JSONArray locations = new JSONArray();
 	locations.put(origin.getJSONArray("coordinates"));
@@ -148,7 +143,7 @@ public List<Ride> getConvinientRides(@RequestBody String json) {
 	)
 	public Ride createRide(@RequestBody String body) {
 		JSONObject json = new JSONObject(body);
-		long driverId = json.getLong("driver_id");
+		long driverId = json.getLong("driverId");
 		Optional<User> driver = userService.findById(driverId);
 		if (!driver.isPresent()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User id: " + driverId + " not found");
@@ -164,7 +159,7 @@ public List<Ride> getConvinientRides(@RequestBody String json) {
 
 		LineString route = (LineString) GeoJSONFactory.create(routeJson.toString());
 		
-		String departureTimeJson = json.getString("departure_time");
+		String departureTimeJson = json.getString("departureTime");
 		Timestamp departureTime = Timestamp.valueOf(departureTimeJson);
 		
 		long duration = json.getLong("duration");
