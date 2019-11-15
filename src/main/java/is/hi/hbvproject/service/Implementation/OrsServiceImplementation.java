@@ -24,10 +24,10 @@ import kong.unirest.json.JSONObject;
 
 @Service
 public class OrsServiceImplementation implements OrsService {
-  @Value("${ors_key}") 
+  @Value("${ors.key}") 
   private String apiKey;
 
-  @Value("${ors_baseurl}")
+  @Value("${ors.baseurl}")
   private String baseUrl;
 
   @Autowired
@@ -51,6 +51,7 @@ public class OrsServiceImplementation implements OrsService {
 			String m = e.getString("message");
 			throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "OpenRouteService error: " + m); 
 		}
+
 		FeatureCollection featureCollection = 
 			(FeatureCollection) GeoJSONFactory.create(response.toString());
 		
@@ -74,12 +75,21 @@ public class OrsServiceImplementation implements OrsService {
 	}
 
 	@Override
-	public FeatureCollection getGeoCodes(String param) {
+	public FeatureCollection getGeoCodes(String param, Point focus) {
 		String geocode = param.trim().replace(" ", "%20");
-		String boundary = "boundary.country=is";
-    String api = "api_key=" + apiKey;
+		String countryBoundary = "boundary.country=is";
+		double[] focusCoords = focus.getCoordinates();
+
     try {
-    JsonNode response = Unirest.get(baseUrl + "/geocode/search?" + api + "&text=" + geocode + "&" + boundary)
+    JsonNode response = Unirest.get(
+			baseUrl + 
+			"/geocode/search?" + 
+			"api_key=" + apiKey + 
+			"&text=" + geocode + 
+			"&" + countryBoundary +
+			"&boundary.circle.radius=100" + // set a 100km radius around the focus point
+			"&boundary.circle.lat=" + focusCoords[0] +
+			"&boundary.circle.lon=" + focusCoords[1])
     .accept("application/json")
     .asJson().getBody();
     
@@ -121,6 +131,7 @@ public class OrsServiceImplementation implements OrsService {
 
 		coordinates.put(originCoords);
 		coordinates.put(destinationCoords);
+
 		body.put("coordinates", coordinates);
 		// Makes sure we don't get unnecessary info
 		body.put("instructions", false);
