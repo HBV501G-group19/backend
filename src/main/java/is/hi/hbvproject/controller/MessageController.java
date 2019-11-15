@@ -44,17 +44,17 @@ public class MessageController {
         long senderId = json.getLong("senderId");
         Optional<User> sender = userService.findById(senderId);
         if (!sender.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sender not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sender not found");
         }
         long recipientId = json.getLong("recipientId");
         Optional<User> recipient = userService.findById(recipientId);
         if (!recipient.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recpient not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Recpient not found");
         }
         long rideId = json.getLong("rideId");
         Optional<Ride> ride = rideService.findById(rideId);
         if (!ride.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride not found");
         }
         String messageBody = json.getString("messageBody");
         if(messageBody.trim().length() == 0)
