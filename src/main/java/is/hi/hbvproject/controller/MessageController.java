@@ -59,7 +59,7 @@ public class MessageController {
         String messageBody = json.getString("messageBody");
         if(messageBody.trim().length() == 0)
         {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot send empty message");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot send empty message");
         }
 
         Message message = new Message(messageBody, recipient.get(), sender.get(), ride.get());
