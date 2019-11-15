@@ -93,7 +93,7 @@ public class RideController {
 		
 		Optional<User> user = userService.findById(userId);
 		if (!user.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User id: " + userId + " not found");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id: " + userId + " not found");
 		}
 
 		List<org.geolatte.geom.Polygon<G2D>> isochrones = ORSUtils.getIsochrones(locations, range, orsKey);
@@ -129,7 +129,7 @@ public class RideController {
 	public Ride getRide(@PathVariable long id) {
 		Optional<Ride> ride = rideService.findById(id);
 		if (!ride.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride not found");
 		}
 		return ride.get();
 	}
@@ -145,7 +145,7 @@ public class RideController {
 		long driverId = json.getLong("driver_id");
 		Optional<User> driver = userService.findById(driverId);
 		if (!driver.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User id: " + driverId + " not found");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id: " + driverId + " not found");
 		}
 		
 		JSONObject originJson = json.getJSONObject("origin");
@@ -174,7 +174,7 @@ public class RideController {
 				}
 				Optional<User> passenger = userService.findById(passengerId);
 				if (!passenger.isPresent()) {
-					throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User id: " + passengerId + " not found");
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id: " + passengerId + " not found");
 				}
 				passengers.add(passenger.get());
 			});
@@ -203,14 +203,14 @@ public class RideController {
 		long passengerId = json.getLong("passengerId");
 		Optional<User> findPassenger = userService.findById(passengerId);
 		if(!findPassenger.isPresent()){
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Passenger " + passengerId + " not found");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passenger " + passengerId + " not found");
 		}
 		User passenger = findPassenger.get();
 
 		long rideId = json.getLong("rideId");
 		Optional<Ride> findRide = rideService.findById(rideId);
 		if (!findRide.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride "+ rideId +"not found");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride "+ rideId +"not found");
 		}
 		Ride ride = findRide.get();
 
