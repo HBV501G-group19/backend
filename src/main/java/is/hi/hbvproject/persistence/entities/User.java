@@ -1,5 +1,7 @@
 package is.hi.hbvproject.persistence.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,7 +16,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -27,7 +28,7 @@ public class User {
 	@Column(unique = true)
 	private String username;
 	@NotNull
-	@Transient
+	@JsonIgnore
 	private String password;
 	
 	@OneToMany(

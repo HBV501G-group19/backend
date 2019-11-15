@@ -20,5 +20,5 @@ public interface MessageService {
 
     List<Message> findSent(User sender);
 
-    List<Message> findRecieved(User recipient);
+    List<Message> findReceived(User recipient);
 }
