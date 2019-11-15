@@ -9,6 +9,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import java.sql.Timestamp;
+import org.hibernate.annotations.CreationTimestamp;
+
 
 @Entity
 @Table(name = "messages")
@@ -27,6 +30,8 @@ public class Message {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     private Ride ride;
+    @CreationTimestamp
+    private Timestamp created;
 
     public Message() {
     }
