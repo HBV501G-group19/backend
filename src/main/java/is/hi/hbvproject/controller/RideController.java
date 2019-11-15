@@ -218,6 +218,13 @@ public class RideController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Driver cannot be added as Passenger");
 		}
 
+		for (long p:ride.getPassengers()) {
+			if(p == passengerId) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passenger: " + passengerId + " is already a passenger" +
+						" and cannot be added multiple times");
+			}
+		}
+
 		ride.addPassenger(passenger);
 		rideService.save(ride);
 
