@@ -141,7 +141,7 @@ public class MessageController {
             method = RequestMethod.POST,
             produces = "application/json"
     )
-    public List<ConversationResponse> getRideConversation(@PathVariable long rideId, @RequestBody String driver) {
+    public List<ConversationResponse> getRideConversation(@PathVariable long rideId, @RequestParam String driver) {
         JSONObject json = new JSONObject(driver);
         long driverId = json.getLong("driverId");
         Optional<Ride> rideOP = rideService.findById(rideId);
@@ -155,12 +155,59 @@ public class MessageController {
         }
         List<ConversationResponse> conversation = new ArrayList<>();
         for (long p: ride.getPassengers()) {
-            ConversationResponse cr = new ConversationResponse(p,(messageService.findConversation(driverId, p, rideId)));
+            ConversationResponse cr = new ConversationResponse(driverId, p, ride.getId(), true, (messageService.findConversation(driverId, p, rideId)));
             conversation.add(cr);
         }
         return conversation;
     }
 
+    @RequestMapping(
+        value = "/messages/conversation/{conversationId}",
+        method = RequestMethod.GET,
+        produces = "application/json"
+    )
+    public List<Message> getConversation(@PathVariable int conversationId){
+        return messageService.findConversation(conversationId);
+    }
+
+    @RequestMapping(
+        value = "/messages/conversation/user/{userId}",
+        method = RequestMethod.GET,
+        produces = "application/json"
+    )
+    public List<ConversationResponse> getUsersConversations(@PathVariable long userId) {
+        List<Message> messages = messageService.findAllConversations(userId);
+        List<ConversationResponse> convos = new ArrayList<>();
+
+        long id = Long.MAX_VALUE;
+        List<Message> convo = new ArrayList<>();
+        for(Message m : messages) {
+            if (id == Long.MAX_VALUE) {
+                id = m.getConversationId();
+                convo.add(m);
+            } else if (id != m.getConversationId()){
+                ConversationResponse cr = makeConversationResponse(convo, userId);
+                convos.add(cr);
+                id = m.getConversationId();
+                convo = new ArrayList<>();
+            }
+            convo.add(m);
+        }
+
+        convos.add(makeConversationResponse(convo, userId));
+        return convos;
+    }
+
+    private ConversationResponse makeConversationResponse(List<Message> convo, long userId) {
+        Message m = convo.get(0);
+        long rideDriver = m.getRide().getDriver();
+        long talkingTo = m.getSenderId();
+        if (talkingTo == userId) {
+            talkingTo = m.getRecipientId();
+        }
+
+        return new ConversationResponse(userId, talkingTo, m.getRideId(), (rideDriver ==  userId), convo);
+    }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, Object>> responseStatusHandler(Exception e) {

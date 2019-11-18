@@ -2,13 +2,10 @@ package is.hi.hbvproject.service.Implementation;
 
 
 import is.hi.hbvproject.persistence.entities.Message;
-import is.hi.hbvproject.persistence.entities.Ride;
 import is.hi.hbvproject.persistence.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import is.hi.hbvproject.service.MessageService;
-import is.hi.hbvproject.persistence.repositories.RideRepository;
-import is.hi.hbvproject.persistence.repositories.UserRepository;
 import is.hi.hbvproject.persistence.repositories.MessageRepository;
 
 
@@ -50,7 +47,15 @@ public class MessageServiceImplementation implements MessageService {
     @Override
     public List<Message> findConversation(long sender, long recipient, long ride)
     {
-        return messageRepository.findConversation(sender, recipient, ride);
+        long firstId = Math.max(sender, recipient);
+        long secondId = Math.min(sender, recipient);
+        int conversationId = (
+            "r" + ride +
+            "u" + firstId +
+            "u" + secondId
+        ).hashCode();
+        return messageRepository.findByConversationId(conversationId);
+        //return messageRepository.findConversation(sender, recipient, ride);
     }
 
     @Override
@@ -70,5 +75,15 @@ public class MessageServiceImplementation implements MessageService {
     {
         return messageRepository.findByRecipient(recipient);
     }
+
+	@Override
+	public List<Message> findAllConversations(long user) {
+		return messageRepository.findAllConversations(user);
+	}
+
+	@Override
+	public List<Message> findConversation(int conversationId) {
+		return messageRepository.findByConversationId(conversationId);
+	}
 
 }

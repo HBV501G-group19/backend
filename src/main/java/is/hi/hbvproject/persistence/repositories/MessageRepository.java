@@ -37,10 +37,20 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             @Param("rideId") long rideId
     );
 
+    public List<Message> findByConversationId(int id);
+
+    @Query(value = "select m from Message m " +
+        "where m.sender.id = :userId " +
+        "or m.recipient.id = :userId " + 
+        "order by (m.conversationId, m.created)"
+    )
+    public List<Message> findAllConversations(@Param("userId") long userId);
+
     public Optional<Message> findMessageById(long id);
 
     public List<Message> findBySender(User sender);
 
     public List<Message> findByRecipient(User recipient );
+
 
 }
