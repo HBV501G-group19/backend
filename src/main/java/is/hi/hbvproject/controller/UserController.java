@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import is.hi.hbvproject.persistence.entities.User;
 import is.hi.hbvproject.service.UserService;
+import kong.unirest.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,14 +50,20 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/users/register", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
-	public User createUser(@RequestBody User user) throws JsonParseException, JsonMappingException, IOException {
-		if (service.existsByUsername(user.getUsername())) {
+	public User createUser(@RequestBody String body) throws JsonParseException, JsonMappingException, IOException {
+		JSONObject user = new JSONObject(body);
+		String username = user.getString("username");
+		String password = user.getString("password");
+
+		if (service.existsByUsername(username)){
 			// ekki viss með þennan status kóða
 			throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User already exists");
 		}
 
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		service.save(user);
-		return user;
+		User userObject = new User();
+		userObject.setUsername(username);
+		userObject.setPassword(passwordEncoder.encode(password));
+		service.save(userObject);
+		return userObject;
 	}
 }
