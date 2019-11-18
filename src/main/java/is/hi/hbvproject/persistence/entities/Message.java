@@ -33,6 +33,8 @@ public class Message {
     @CreationTimestamp
     private Timestamp created;
 
+    private int conversationId;
+
     public Message() {
     }
 
@@ -41,6 +43,23 @@ public class Message {
         this.recipient = recipient;
         this.sender = sender;
         this.ride = ride;
+
+        // 'unique' identity fyrir convoið
+        // 32bit integer er allt of lítið fyrir alvöru app
+        long rideId = ride.getId();
+        long senderId = sender.getId();
+        long recipientId = recipient.getId();
+        long firstId = Math.max(senderId, recipientId);
+        long secondId = Math.min(senderId, recipientId);
+        this.conversationId = (
+            "r" + rideId +
+            "u" + firstId +
+            "u" + secondId
+        ).hashCode();
+    }
+
+    public int getConversationId() {
+        return conversationId;
     }
 
     public User getRecipient() {
