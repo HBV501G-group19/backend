@@ -171,7 +171,7 @@ public class MessageController {
     }
 
     @RequestMapping(
-        value = "/messages/conversation/user/{userId}",
+        value = "/messages/user/{userId}",
         method = RequestMethod.GET,
         produces = "application/json"
     )
