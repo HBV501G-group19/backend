@@ -1,7 +1,7 @@
 package is.hi.hbvproject.service;
 
+
 import is.hi.hbvproject.persistence.entities.Message;
-import is.hi.hbvproject.persistence.entities.Ride;
 import is.hi.hbvproject.persistence.entities.User;
 
 import java.util.List;
@@ -15,6 +15,9 @@ public interface MessageService {
     void deleteAll();
 
     List<Message> findConversation(long sender, long recipient, long ride);
+    List<Message> findConversation(int conversationId);
+
+    List<Message> findAllConversations(long user);
 
     Optional<Message> findMessage(long id);
 
