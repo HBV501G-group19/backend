@@ -70,6 +70,11 @@ public class Message {
         return recipient.getId();
     }
 
+    @JsonGetter("recipientName")
+    public String getRecipientName() {
+        return recipient.getUsername();
+    }
+
     public void setRecipient(User recipient) {
         this.recipient = recipient;
     }
@@ -82,6 +87,12 @@ public class Message {
     public long getSenderId() {
         return sender.getId();
     }
+
+    @JsonGetter("senderName")
+    public String getSenderName() {
+        return sender.getUsername();
+    }
+
     public void setSender(User sender) {
         this.sender = sender;
     }
