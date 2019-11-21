@@ -12,5 +12,6 @@ import kong.unirest.json.JSONArray;
 public interface OrsService {
   List<org.geolatte.geom.Polygon<G2D>> getIsochrones(JSONArray locations, JSONArray range);
   FeatureCollection getGeoCodes(String geocode, Point focus);
+  Feature getGeoNames(Point coordinates);
   Feature getDirections(Point origin, Point destination, String profile);
 }

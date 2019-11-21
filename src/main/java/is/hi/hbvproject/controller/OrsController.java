@@ -48,6 +48,24 @@ public class OrsController {
   }
 
   @RequestMapping(
+    value = "/ors/geoname",
+    method = RequestMethod.POST,
+    produces = "application/json",
+    consumes = "application/json"
+  )
+  public Feature getGeoname(@RequestBody String json) {
+    JSONObject body = new JSONObject(json);
+    JSONArray coordinatesJson = body.getJSONArray("coordinates");
+
+    double[] coordinates = {
+      coordinatesJson.getDouble(0), coordinatesJson.getDouble(1)
+    };
+
+    Point coordinatesPoint = new Point(coordinates);
+    return orsService.getGeoNames(coordinatesPoint);
+  }
+
+  @RequestMapping(
     value = "/ors/directions",
     method = RequestMethod.POST,
     produces = "application/json",

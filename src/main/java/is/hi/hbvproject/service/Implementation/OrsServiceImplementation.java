@@ -151,4 +151,24 @@ public class OrsServiceImplementation implements OrsService {
 
 		return feature;
 	}
+
+	@Override
+	public Feature getGeoNames(Point coordinates) {
+		// TODO Auto-generated method stub
+		double[] coords = coordinates.getCoordinates();
+    JsonNode response = Unirest.get(
+			baseUrl + 
+			"/geocode/reverse?" + 
+			"api_key=" + apiKey + 
+			"&point.lon=" + coords[0] + 
+			"&point.lat=" + coords[1] +
+			"&boundary.circle.radius=0.2" +
+			"&size=1")
+    .accept("application/json")
+    .asJson().getBody();
+		
+		FeatureCollection results = (FeatureCollection) GeoJSONFactory.create(response.toString());
+		Feature result = results.getFeatures()[0];
+		return result;
+	}
 }
