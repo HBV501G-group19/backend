@@ -2,11 +2,14 @@ package is.hi.hbvproject.persistence.entities;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -15,16 +18,17 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
 import org.geolatte.geom.G2D;
 import org.wololo.geojson.Point;
+import org.wololo.geojson.Feature;
+import org.wololo.geojson.Geometry;
 import org.wololo.geojson.LineString;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 
+import is.hi.hbvproject.utils.RidePropertiesConverter;
 import is.hi.hbvproject.utils.WololoGeolatteConverter;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -72,11 +76,18 @@ public class Ride {
 	private long duration;
 	
 	@NotNull
+	private double distance;
+
+	@NotNull
 	private short totalSeats;
 	
 	@NotNull
 	private short freeSeats;
 		
+	@Column(columnDefinition="text")
+	@Convert(converter = RidePropertiesConverter.class)
+	private Map<String, Object> properties = new HashMap<>();
+
 	public Ride() {}
 
 	public Ride(
@@ -85,6 +96,7 @@ public class Ride {
 			LineString r,
 			Timestamp departureTime,
 			long duration,
+			double distance,
 			short seats,
 			User driver,
 			List<User> passengers
@@ -92,6 +104,7 @@ public class Ride {
 		this.driver = driver;
 		this.departureTime= departureTime;
 		this.duration = duration;
+		this.distance = distance;
 		this.totalSeats = seats;
 		this.freeSeats = seats;
         
@@ -132,6 +145,7 @@ public class Ride {
 	public void setPassengers(Set<User> passengers) {
 		this.passengers = passengers;
 	}
+
 	public Timestamp getCreated() {
 		return created;
 	}
@@ -192,8 +206,16 @@ public class Ride {
 		return duration;
 	}
 
-	public void duration(long duration) {
+	public void setDuration(long duration) {
 		this.duration = duration;
+	}
+
+	public double getDistance() {
+		return distance;
+	}
+
+	public void setDistance(long distance) {
+		this.distance = distance;
 	}
 	
 	public short getTotalSeats() {
@@ -213,5 +235,23 @@ public class Ride {
 		}
 		
 		freeSeats = seats;
+	}
+
+	public Map<String, Object> getProperties() {
+		return properties;
+	}
+
+	public void setProperty(String key, Object value) {
+		properties.putIfAbsent(key, value);
+	}
+
+	public Feature getRouteAsFeature() {
+		LineString route =  WololoGeolatteConverter.toWololoLineString(this.route);
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("rideId", id);
+		properties.put("departureTime", departureTime);
+		properties.put("duration", duration);
+		Feature routeFeature = new Feature((Geometry) route, properties);
+		return routeFeature;
 	}
 }

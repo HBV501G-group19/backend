@@ -193,8 +193,8 @@ public class MessageController {
             }
             convo.add(m);
         }
-
-        convos.add(makeConversationResponse(convo, userId));
+        if (messages.size() > 0)
+            convos.add(makeConversationResponse(convo, userId));
         return convos;
     }
 

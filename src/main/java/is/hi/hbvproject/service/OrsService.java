@@ -8,9 +8,11 @@ import org.wololo.geojson.FeatureCollection;
 import org.wololo.geojson.Point;
 
 import kong.unirest.json.JSONArray;
+import kong.unirest.json.JSONObject;
 
 public interface OrsService {
   List<org.geolatte.geom.Polygon<G2D>> getIsochrones(JSONArray locations, JSONArray range);
   FeatureCollection getGeoCodes(String geocode, Point focus);
-  Feature getDirections(Point origin, Point destination, String profile);
+  Feature getGeoNames(Point coordinates, JSONObject properties);
+  Feature getDirections(Point origin, Point destination, String profile, JSONObject properties);
 }
