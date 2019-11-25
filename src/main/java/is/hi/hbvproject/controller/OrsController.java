@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.geojson.Point;
+import org.wololo.jts2geojson.GeoJSONWriter;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.FeatureCollection;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import is.hi.hbvproject.service.OrsService;
+import is.hi.hbvproject.service.RideService;
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
 
@@ -22,10 +24,12 @@ import kong.unirest.json.JSONObject;
 @CrossOrigin
 public class OrsController {
   OrsService orsService;
+  RideService rideService;
   
 	@Autowired
-	public OrsController(OrsService orsService) {
-		this.orsService = orsService;
+	public OrsController(OrsService orsService, RideService rideService) {
+    this.orsService = orsService;
+    this.rideService = rideService;
   }
   
   @RequestMapping(
@@ -56,13 +60,14 @@ public class OrsController {
   public Feature getGeoname(@RequestBody String json) {
     JSONObject body = new JSONObject(json);
     JSONArray coordinatesJson = body.getJSONArray("coordinates");
+    JSONObject props = body.optJSONObject("properties");
 
     double[] coordinates = {
       coordinatesJson.getDouble(0), coordinatesJson.getDouble(1)
     };
 
     Point coordinatesPoint = new Point(coordinates);
-    return orsService.getGeoNames(coordinatesPoint);
+    return orsService.getGeoNames(coordinatesPoint, props);
   }
 
   @RequestMapping(
@@ -71,28 +76,43 @@ public class OrsController {
     produces = "application/json",
     consumes = "application/json"
   )
-  public List<Feature> getDirections(@RequestBody String json) {
-    JSONObject body = new JSONObject(json);
-    System.out.println("\n\n\n");
-    System.out.println(body);
-    System.out.println("\n\n\n");
-    JSONArray endpointsArray = body.getJSONArray("endpoints");
-    List<Feature> paths = new ArrayList<>();
-    for (int i = 0; i < endpointsArray.length(); i++) {
-      
-      String eString = endpointsArray.get(i).toString();
-      JSONObject endpoints = new JSONObject(eString);
+  public List<FeatureCollection> getDirections(@RequestBody String json) {
+    JSONArray body = new JSONArray(json);
 
-      String o = endpoints.get("origin").toString();
-      Point origin = (Point) GeoJSONFactory.create(o);
-      String d = endpoints.get("destination").toString();
-      Point destination = (Point) GeoJSONFactory.create(d);
-      String profile = endpoints.getString("profile");
+    List<FeatureCollection> results = new ArrayList<>();
+    for(int i=0; i < body.length(); i++) {
+      String endpointsString = body.get(i).toString();
+      JSONObject endpointsJson = new JSONObject(endpointsString);
 
-      Feature path = orsService.getDirections(origin, destination, profile);
-      paths.add(path);
+      JSONObject o = endpointsJson.getJSONObject("origin");
+      Point origin = (Point) GeoJSONFactory.create(o.toString());
+
+      JSONObject d = endpointsJson.getJSONObject("destination");
+      Point destination = (Point) GeoJSONFactory.create(d.toString());
+
+      JSONObject properties = endpointsJson.getJSONObject("properties");
+
+
+      List<Feature> directions = new ArrayList<>();
+      directions.addAll(makeDirectionFeatures(origin, destination, properties));
+
+      FeatureCollection direcionsCollection = new GeoJSONWriter().write(directions);
+      results.add(direcionsCollection);
     }
+    return results;
+  }
 
-    return paths;
+  private List<Feature> makeDirectionFeatures(Point start, Point end, JSONObject properties) {
+    Feature startNames = orsService.getGeoNames(start, properties);
+    Feature endNames = orsService.getGeoNames(end, properties);
+
+    String profile = properties.getString("profile");
+    Feature directions = orsService.getDirections(start, end, profile, properties);
+
+    List<Feature> res = new ArrayList<>();
+    res.add(startNames);
+    res.add(endNames);
+    res.add(directions);
+    return res;
   }
 }
