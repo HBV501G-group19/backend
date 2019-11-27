@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import org.wololo.geojson.LineString;
 import org.wololo.geojson.Point;
+import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSONFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -153,16 +154,22 @@ public List<Ride> getConvinientRides(@RequestBody String json) {
 		JSONObject destinationJson = json.getJSONObject("destination");
 		JSONObject routeJson = json.getJSONObject("route");
 		
+		
 		Point origin = (Point) GeoJSONFactory.create(originJson.toString());
 		
 		Point destination = (Point) GeoJSONFactory.create(destinationJson.toString());
+		
+		Feature originProps = orsService.getGeoNames(origin, new JSONObject("{}"));
+		Feature destinationProps = orsService.getGeoNames(destination, new JSONObject("{}"));
 
+		
 		LineString route = (LineString) GeoJSONFactory.create(routeJson.toString());
 		
 		String departureTimeJson = json.getString("departureTime");
 		Timestamp departureTime = Timestamp.valueOf(departureTimeJson);
 		
 		long duration = json.getLong("duration");
+		double distance = json.getFloat("distance");
 		short seats = (short) json.getInt("seats");
 
 		List<User> passengers = new ArrayList<>();
@@ -186,10 +193,14 @@ public List<Ride> getConvinientRides(@RequestBody String json) {
 			route,
 			departureTime,
 			duration,
+			distance,
 			seats,
 			driver.get(),
 			passengers
 		);
+
+		ride.setProperty("origin", originProps.getProperties());
+		ride.setProperty("destination", destinationProps.getProperties());
 		rideService.save(ride);
 		return ride;
 	}

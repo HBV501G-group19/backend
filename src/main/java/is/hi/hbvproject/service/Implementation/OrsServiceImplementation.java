@@ -2,6 +2,7 @@ package is.hi.hbvproject.service.Implementation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.geolatte.geom.G2D;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,7 @@ public class OrsServiceImplementation implements OrsService {
 			"api_key=" + apiKey + 
 			"&text=" + geocode + 
 			"&" + countryBoundary +
-			"&boundary.circle.radius=100" + // set a 100km radius around the focus point
+			"&boundary.circle.radius=1000" + // set a 1000km radius around the focus point
 			"&boundary.circle.lat=" + focusCoords[0] +
 			"&boundary.circle.lon=" + focusCoords[1])
     .accept("application/json")
@@ -101,7 +102,7 @@ public class OrsServiceImplementation implements OrsService {
 	}
 	
 	@Override
-	public Feature getDirections(Point origin, Point destination, String profile) {
+	public Feature getDirections(Point origin, Point destination, String profile, JSONObject properties) {
 		JSONArray coordinates = new JSONArray();
 		JSONObject body = new JSONObject();
 
@@ -146,9 +147,39 @@ public class OrsServiceImplementation implements OrsService {
 			.asJson()
 			.getBody();
 
+		System.out.println(response.toPrettyString());
+
 		FeatureCollection featureCollection = (FeatureCollection) GeoJSONFactory.create(response.toString());
 		Feature feature = featureCollection.getFeatures()[0];
+		Map<String, Object> props = feature.getProperties();
+		props.putAll(properties.toMap());
+		return new Feature(feature.getGeometry(), props);
+	}
 
-		return feature;
+	@Override
+	public Feature getGeoNames(Point coordinates, JSONObject properties) {
+		if(properties == null) {
+			properties = new JSONObject("{}");
+		}
+		// TODO Auto-generated method stub
+		double[] coords = coordinates.getCoordinates();
+    JsonNode response = Unirest.get(
+			baseUrl + 
+			"/geocode/reverse?" + 
+			"api_key=" + apiKey + 
+			"&point.lon=" + coords[0] + 
+			"&point.lat=" + coords[1] +
+			"&boundary.circle.radius=0.2" +
+			"&size=1")
+    .accept("application/json")
+    .asJson().getBody();
+		
+		// returns a feature collection containing the names and points
+		FeatureCollection results = (FeatureCollection) GeoJSONFactory.create(response.toString());
+		// we only want the result with the highest confidence
+		Feature result = results.getFeatures()[0];
+		Map<String, Object> props = result.getProperties();
+		props.putAll(properties.toMap());
+		return new Feature(result.getGeometry(), props);
 	}
 }

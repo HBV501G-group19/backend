@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import is.hi.hbvproject.persistence.entities.Message;
 import is.hi.hbvproject.persistence.entities.User;
 
 import java.util.List;
