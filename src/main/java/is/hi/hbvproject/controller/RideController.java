@@ -101,9 +101,9 @@ public List<Ride> getConvinientRides(@RequestBody String json) {
 	List<org.geolatte.geom.Polygon<G2D>> isochrones = orsService.getIsochrones(locations, range);
 	
 	Timestamp minTimestamp = (Timestamp) departureTime.clone();
-	minTimestamp.setTime((departureTime.getTime() - 600000));
+	minTimestamp.setTime((departureTime.getTime() - 300000)); // five minutes ago
 	Timestamp maxTimestamp = (Timestamp) departureTime.clone();
-	maxTimestamp.setTime((departureTime.getTime() + 600000));
+	maxTimestamp.setTime((departureTime.getTime() + 28800000)); // in 8 hours
 
 	List<Ride> rides = rideService.findNearby(
 		isochrones.get(0),

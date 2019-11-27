@@ -147,8 +147,6 @@ public class OrsServiceImplementation implements OrsService {
 			.asJson()
 			.getBody();
 
-		System.out.println(response.toPrettyString());
-
 		FeatureCollection featureCollection = (FeatureCollection) GeoJSONFactory.create(response.toString());
 		Feature feature = featureCollection.getFeatures()[0];
 		Map<String, Object> props = feature.getProperties();
