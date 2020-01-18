@@ -2,21 +2,32 @@ package is.hi.hbvproject.models.requestObjects.ride;
 
 import java.sql.Timestamp;
 
+import javax.validation.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.wololo.geojson.Point;
 
 public class ConvinientRideRequest{
-	@JsonProperty("user")
-	Long user;
-	@JsonProperty("origin")
-	Point origin;
-	@JsonProperty("destination")
-	Point destination;
-	@JsonProperty("range")
-	double[] range;
-	@JsonProperty("departure_time")
-	String departureTime;
+  @JsonProperty("user")
+  @NotEmpty
+  Long user;
+  
+  @JsonProperty("origin")
+  @NotEmpty
+  Point origin;
+  
+  @JsonProperty("destination")
+  @NotEmpty
+  Point destination;
+  
+  @JsonProperty("range")
+  @NotEmpty
+  double[] range;
+  
+  @JsonProperty("departure_time")
+  @NotEmpty
+  String departureTime;
   
   private ConvinientRideRequest() {}
 

@@ -3,6 +3,8 @@ package is.hi.hbvproject.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,7 +41,7 @@ public class OrsController {
     produces = "application/json",
     consumes = "application/json"
   )
-  public FeatureCollection getGeocodes(@RequestBody GeocodeRequest body) {
+  public FeatureCollection getGeocodes(@RequestBody @Valid GeocodeRequest body) {
     return orsService.getGeoCodes(body.getGeocode(), body.getFocus());
   }
 
@@ -69,7 +71,7 @@ public class OrsController {
     produces = "application/json",
     consumes = "application/json"
   )
-  public List<FeatureCollection> getDirections(@RequestBody List<DirectionsRequest> queries) {
+  public List<FeatureCollection> getDirections(@RequestBody List<@Valid DirectionsRequest> queries) {
     List<FeatureCollection> results = new ArrayList<>();
     for (DirectionsRequest d : queries) {
       List<Feature> directions = new ArrayList<>();

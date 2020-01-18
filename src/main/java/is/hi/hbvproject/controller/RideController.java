@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.wololo.geojson.Feature;
 
 import kong.unirest.json.JSONArray;
@@ -47,7 +49,7 @@ public class RideController {
 		consumes = "application/json",
 		produces = "application/json"
 	)
-	public List<Ride> getConvinientRides(@RequestBody ConvinientRideRequest body) {
+	public List<Ride> getConvinientRides(@RequestBody @Valid ConvinientRideRequest body) {
 		// TODO: Refactor to not need JSONArrays here
 		JSONArray locations = new JSONArray();
 		locations.put(body.getOrigin().getCoordinates());
@@ -98,7 +100,7 @@ public class RideController {
 			consumes = "application/json",
 			produces = "application/json"
 	)
-	public Ride createRide(@RequestBody CreateRideRequest body) {
+	public Ride createRide(@RequestBody @Valid CreateRideRequest body) {
 		Optional<User> driver = userService.findById(body.getDriver());
 		if (!driver.isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id: " + body.getDriver() + " not found");
@@ -148,7 +150,7 @@ public class RideController {
 			method = RequestMethod.PATCH,
 			produces = "application/json"
 	)
-	public Ride addPassenger(@RequestBody AddPassengerRequest body) {
+	public Ride addPassenger(@RequestBody @Valid  AddPassengerRequest body) {
 		Long passengerId = body.getPassenger();
 
 		Optional<User> findPassenger = userService.findById(passengerId);

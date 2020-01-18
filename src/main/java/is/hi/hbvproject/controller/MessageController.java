@@ -14,7 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.validation.Valid;
 
 import kong.unirest.json.JSONObject;
 
@@ -37,7 +43,7 @@ public class MessageController {
             consumes = "application/json",
             produces = "application/json"
     )
-    public Message createMessage(@RequestBody CreateMessageRequest message) {
+    public Message createMessage(@RequestBody @Valid CreateMessageRequest message) {
         Optional<User> sender = userService.findById(message.getSender());
         if (!sender.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sender not found");

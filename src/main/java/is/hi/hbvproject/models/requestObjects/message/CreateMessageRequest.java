@@ -1,15 +1,21 @@
 package is.hi.hbvproject.models.requestObjects.message;
 
+import javax.validation.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CreateMessageRequest {
   @JsonProperty("sender")
+  @NotEmpty
   private Long sender;
   @JsonProperty("recipient")
+  @NotEmpty
   private Long recipient;
   @JsonProperty("ride")
+  @NotEmpty
   private Long ride;
   @JsonProperty("body")
+  @NotEmpty
   private String body;
 
 

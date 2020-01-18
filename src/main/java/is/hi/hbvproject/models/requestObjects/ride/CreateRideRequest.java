@@ -1,6 +1,10 @@
 package is.hi.hbvproject.models.requestObjects.ride;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -9,25 +13,38 @@ import org.wololo.geojson.Point;
 
 public class CreateRideRequest {
   @JsonProperty("driver")
+  @NotEmpty
   private Long driver;
+
   @JsonProperty("passengers")
-  private Long[] passengers;
+  private List<Long> passengers;
+
   @JsonProperty("origin")
+  @NotEmpty
   private Point origin;
+
   @JsonProperty("destination")
+  @NotEmpty
   private Point destination;
+
   @JsonProperty("route")
+  @NotEmpty
   private LineString route;
+
   @JsonProperty("departure_time")
+  @NotEmpty
   private String departureTime;
+
   @JsonProperty("seats")
+  @NotEmpty
   private short seats;
+
 
   private CreateRideRequest() {}
 
   public CreateRideRequest(
     Long driver,
-    Long[] passengers,
+    List<Long> passengers,
     Point origin,
     Point destination,
     LineString route,
@@ -35,7 +52,8 @@ public class CreateRideRequest {
     short seats
   ) {
     this.driver = driver;
-    this.passengers = passengers;
+    if (passengers == null) passengers = new ArrayList<Long>();
+    else this.passengers = passengers;
     this.origin = origin;
     this.destination = destination;
     this.route = route;
@@ -47,7 +65,7 @@ public class CreateRideRequest {
     return driver;
   }
 
-  public Long[] getPassengers() {
+  public List<Long> getPassengers() {
     return passengers;
   }
 

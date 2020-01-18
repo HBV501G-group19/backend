@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -74,7 +76,7 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/users/register", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
-	public User createUser(@RequestBody CreateUserRequest user) {
+	public User createUser(@RequestBody @Valid CreateUserRequest user) {
 		if (service.existsByUsername(user.getUsername())){
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exists");
 		}

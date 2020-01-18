@@ -1,11 +1,16 @@
 package is.hi.hbvproject.models.requestObjects.ride;
 
+import javax.validation.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AddPassengerRequest {
   @JsonProperty("passenger")
+  @NotEmpty
   Long passenger;
+
   @JsonProperty("ride")
+  @NotEmpty
   Long ride;
   
   private AddPassengerRequest() {}

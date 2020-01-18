@@ -1,13 +1,20 @@
 package is.hi.hbvproject.models.requestObjects.user;
 
+import javax.validation.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CreateUserRequest {
   @JsonProperty("username")
+  @NotEmpty
   private String username;
+  
   @JsonProperty("email")
+  @NotEmpty
   private String email;
+  
   @JsonProperty("password")
+  @NotEmpty
   private String password;
 
   private CreateUserRequest() {}
