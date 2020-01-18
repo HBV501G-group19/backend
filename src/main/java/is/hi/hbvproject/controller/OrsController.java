@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.wololo.geojson.GeoJSONFactory;
 import org.wololo.geojson.Point;
 import org.wololo.jts2geojson.GeoJSONWriter;
 import org.wololo.geojson.Feature;
@@ -15,6 +14,8 @@ import org.wololo.geojson.FeatureCollection;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import is.hi.hbvproject.models.requestObjects.ors.DirectionsRequest;
+import is.hi.hbvproject.models.requestObjects.ors.GeocodeRequest;
 import is.hi.hbvproject.service.OrsService;
 import is.hi.hbvproject.service.RideService;
 import kong.unirest.json.JSONArray;
@@ -38,17 +39,8 @@ public class OrsController {
     produces = "application/json",
     consumes = "application/json"
   )
-  public FeatureCollection getGeocodes(@RequestBody String json) {
-    JSONObject body = new JSONObject(json);
-    JSONArray focus = body.getJSONArray("focus");
-
-    double[] focusCoords = {
-      focus.getDouble(0), focus.getDouble(1)
-    };
-
-    Point focusPoint = new Point(focusCoords);
-    String geocode = body.getString("geocode");
-    return orsService.getGeoCodes(geocode, focusPoint);
+  public FeatureCollection getGeocodes(@RequestBody GeocodeRequest body) {
+    return orsService.getGeoCodes(body.getGeocode(), body.getFocus());
   }
 
   @RequestMapping(
@@ -58,6 +50,7 @@ public class OrsController {
     consumes = "application/json"
   )
   public Feature getGeoname(@RequestBody String json) {
+    // TODO: better define properties object
     JSONObject body = new JSONObject(json);
     JSONArray coordinatesJson = body.getJSONArray("coordinates");
     JSONObject props = body.optJSONObject("properties");
@@ -76,25 +69,11 @@ public class OrsController {
     produces = "application/json",
     consumes = "application/json"
   )
-  public List<FeatureCollection> getDirections(@RequestBody String json) {
-    JSONArray body = new JSONArray(json);
-
+  public List<FeatureCollection> getDirections(@RequestBody List<DirectionsRequest> queries) {
     List<FeatureCollection> results = new ArrayList<>();
-    for(int i=0; i < body.length(); i++) {
-      String endpointsString = body.get(i).toString();
-      JSONObject endpointsJson = new JSONObject(endpointsString);
-
-      JSONObject o = endpointsJson.getJSONObject("origin");
-      Point origin = (Point) GeoJSONFactory.create(o.toString());
-
-      JSONObject d = endpointsJson.getJSONObject("destination");
-      Point destination = (Point) GeoJSONFactory.create(d.toString());
-
-      JSONObject properties = endpointsJson.getJSONObject("properties");
-
-
+    for (DirectionsRequest d : queries) {
       List<Feature> directions = new ArrayList<>();
-      directions.addAll(makeDirectionFeatures(origin, destination, properties));
+      directions.addAll(makeDirectionFeatures(d.getOrigin(), d.getDestination(), d.getProperties()));
 
       FeatureCollection direcionsCollection = new GeoJSONWriter().write(directions);
       results.add(direcionsCollection);

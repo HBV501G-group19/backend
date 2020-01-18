@@ -1,5 +1,6 @@
 package is.hi.hbvproject.controller;
 
+import is.hi.hbvproject.models.requestObjects.message.CreateMessageRequest;
 import is.hi.hbvproject.models.responseObjects.ConversationResponse;
 import is.hi.hbvproject.persistence.entities.User;
 import is.hi.hbvproject.persistence.entities.Message;
@@ -30,39 +31,34 @@ public class MessageController {
         this.rideService = rideService;
     }
 
-
     @RequestMapping(
             value = "/messages/create",
             method = RequestMethod.POST,
             consumes = "application/json",
             produces = "application/json"
     )
-    public Message createMessage(@RequestBody String body) {
-        JSONObject json = new JSONObject(body);
-        long senderId = json.getLong("senderId");
-        Optional<User> sender = userService.findById(senderId);
+    public Message createMessage(@RequestBody CreateMessageRequest message) {
+        Optional<User> sender = userService.findById(message.getSender());
         if (!sender.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sender not found");
         }
-        long recipientId = json.getLong("recipientId");
-        Optional<User> recipient = userService.findById(recipientId);
+        Optional<User> recipient = userService.findById(message.getRecipient());
         if (!recipient.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Recipient not found");
         }
-        long rideId = json.getLong("rideId");
-        Optional<Ride> ride = rideService.findById(rideId);
+        Optional<Ride> ride = rideService.findById(message.getRide());
         if (!ride.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride not found");
         }
-        String messageBody = json.getString("messageBody");
+        String messageBody = message.getBody();
         if(messageBody.trim().length() == 0)
         {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot send empty message");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message must contain a message body");
         }
 
-        Message message = new Message(messageBody, recipient.get(), sender.get(), ride.get());
-        messageService.save(message);
-        return message;
+        Message messageEntity = new Message(messageBody, recipient.get(), sender.get(), ride.get());
+        messageService.save(messageEntity);
+        return messageEntity;
     }
 
     @RequestMapping(
@@ -134,31 +130,6 @@ public class MessageController {
         }
         List<Message> message = messageService.findReceived(recipient.get());
         return message;
-    }
-
-    @RequestMapping(
-            value = "/Messages/driver-conversations/{rideId}",
-            method = RequestMethod.POST,
-            produces = "application/json"
-    )
-    public List<ConversationResponse> getRideConversation(@PathVariable long rideId, @RequestParam String driver) {
-        JSONObject json = new JSONObject(driver);
-        long driverId = json.getLong("driverId");
-        Optional<Ride> rideOP = rideService.findById(rideId);
-        if(!rideOP.isPresent())
-        {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride not found");
-        }
-        Ride ride = rideOP.get();
-        if(ride.getDriver() != driverId){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong driver sent");
-        }
-        List<ConversationResponse> conversation = new ArrayList<>();
-        for (long p: ride.getPassengers()) {
-            ConversationResponse cr = new ConversationResponse(driverId, p, ride.getId(), true, (messageService.findConversation(driverId, p, rideId)));
-            conversation.add(cr);
-        }
-        return conversation;
     }
 
     @RequestMapping(
