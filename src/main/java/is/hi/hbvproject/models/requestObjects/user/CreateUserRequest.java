@@ -11,7 +11,6 @@ public class CreateUserRequest {
   private String username;
   
   @JsonProperty("email")
-  @NotEmpty
   @Email
   private String email;
   
