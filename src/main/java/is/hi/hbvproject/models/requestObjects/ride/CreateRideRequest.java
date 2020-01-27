@@ -1,10 +1,14 @@
 package is.hi.hbvproject.models.requestObjects.ride;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.FutureOrPresent;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -13,30 +17,39 @@ import org.wololo.geojson.Point;
 
 public class CreateRideRequest {
   @JsonProperty("driver")
-  @NotEmpty
+  @NotNull
   private Long driver;
 
   @JsonProperty("passengers")
   private List<Long> passengers;
 
   @JsonProperty("origin")
-  @NotEmpty
+  @NotNull
   private Point origin;
 
   @JsonProperty("destination")
-  @NotEmpty
+  @NotNull
   private Point destination;
 
   @JsonProperty("route")
-  @NotEmpty
+  @NotNull
   private LineString route;
 
-  @JsonProperty("departure_time")
-  @NotEmpty
-  private String departureTime;
+  @JsonProperty("distance")
+  @NotNull
+  private long distance;
+  
+  @JsonProperty("duration")
+  @NotNull
+  private long duration;
+
+  @NotNull
+  @FutureOrPresent
+  private LocalDateTime departureTime;
 
   @JsonProperty("seats")
-  @NotEmpty
+  @NotNull
+  @Positive
   private short seats;
 
 
@@ -48,7 +61,8 @@ public class CreateRideRequest {
     Point origin,
     Point destination,
     LineString route,
-    String departureTime,
+    long distance,
+    long duration,
     short seats
   ) {
     this.driver = driver;
@@ -57,8 +71,15 @@ public class CreateRideRequest {
     this.origin = origin;
     this.destination = destination;
     this.route = route;
-    this.departureTime = departureTime;
+    this.distance = distance;
+    this.duration = duration;
     this.seats = seats;
+  }
+
+  @JsonProperty("departureTime")
+  private void unpackTimestamp(String timeString){
+    LocalDateTime time = LocalDateTime.parse(timeString);
+    this.departureTime = time;
   }
 
   public Long getDriver() {
@@ -79,6 +100,14 @@ public class CreateRideRequest {
 
   public LineString getRoute() {
     return route;
+  }
+
+  public long getDistance() {
+    return distance;
+  }
+
+  public long getDuration() {
+    return duration;
   }
 
   public Timestamp getDepartureTime() {

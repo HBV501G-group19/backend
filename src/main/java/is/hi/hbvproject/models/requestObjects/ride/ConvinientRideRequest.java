@@ -2,7 +2,12 @@ package is.hi.hbvproject.models.requestObjects.ride;
 
 import java.sql.Timestamp;
 
+import java.time.LocalDateTime;
+
+import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,24 +15,25 @@ import org.wololo.geojson.Point;
 
 public class ConvinientRideRequest{
   @JsonProperty("user")
-  @NotEmpty
-  Long user;
+  @NotNull
+  @Positive
+  private Long user;
   
   @JsonProperty("origin")
-  @NotEmpty
-  Point origin;
+  @NotNull
+  private Point origin;
   
   @JsonProperty("destination")
-  @NotEmpty
-  Point destination;
+  @NotNull
+  private Point destination;
   
   @JsonProperty("range")
-  @NotEmpty
-  double[] range;
+  @NotNull
+  private double[] range;
   
-  @JsonProperty("departure_time")
   @NotEmpty
-  String departureTime;
+  @FutureOrPresent
+  private LocalDateTime departureTime;
   
   private ConvinientRideRequest() {}
 
@@ -36,13 +42,18 @@ public class ConvinientRideRequest{
     Point origin,
     Point destination,
     double[] range,
-    String departureTime
+    LocalDateTime departureTime
   ) {
     this.user = user;
-    this.origin = origin  ;
-    this.destination = destination  ;
+    this.origin = origin;
+    this.destination = destination;
     this.range = range;
-    this.departureTime = departureTime  ;
+  }
+
+  @JsonProperty("departureTime")
+  private void unpackTimestamp(String timeString){
+    LocalDateTime time = LocalDateTime.parse(timeString);
+    this.departureTime = time;
   }
 
   public long getUser() {

@@ -3,16 +3,12 @@ package is.hi.hbvproject.controller;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 import is.hi.hbvproject.models.requestObjects.user.CreateUserRequest;
 import is.hi.hbvproject.persistence.entities.Ride;
 import is.hi.hbvproject.persistence.entities.User;
 import is.hi.hbvproject.service.RideService;
 import is.hi.hbvproject.service.UserService;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

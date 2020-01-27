@@ -65,18 +65,14 @@ public class JwtAuthenticationController {
 			throw new Exception("USER_DISABLED", e);
 		}
   }
-  
-  @ExceptionHandler
-  public ResponseEntity<Map<String, Object>> unknownException(Exception e) {
-    Map<String, Object> responseBody = new HashMap<>();
-    responseBody.put("error", "unknown error occurred: " + e.getMessage());
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
-  }
 
   @ExceptionHandler
-  public ResponseEntity<Map<String, Object>> badCredentailsHandler(BadCredentialsException e) {
+  public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException e) {
     Map<String, Object> responseBody = new HashMap<>();
-    responseBody.put("error", "Incorrect username or password");
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
+    responseBody.put("error", "authentication");
+    responseBody.put("message", "incorrect username or password");
+    responseBody.put("status", HttpStatus.BAD_REQUEST);
+    responseBody.put("path", "/users/authenticate");
+    return ResponseEntity.badRequest().body(responseBody);
   }
 }

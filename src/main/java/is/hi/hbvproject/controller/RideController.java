@@ -103,7 +103,7 @@ public class RideController {
 	public Ride createRide(@RequestBody @Valid CreateRideRequest body) {
 		Optional<User> driver = userService.findById(body.getDriver());
 		if (!driver.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id: " + body.getDriver() + " not found");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id " + body.getDriver() + " not found");
 		}
 		
 		Feature originProps = orsService.getGeoNames(body.getOrigin(), new JSONObject("{}"));
@@ -112,11 +112,11 @@ public class RideController {
 		List<User> passengers = new ArrayList<>();
 		for(Long passengerId : body.getPassengers()) {
 				if (passengerId == body.getDriver()) {
-					throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Driver can not be a passenger");
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Driver can not be a passenger");
 				}
 				Optional<User> passenger = userService.findById(passengerId);
 				if (!passenger.isPresent()) {
-					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id: " + passengerId + " not found");
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id " + passengerId + " not found");
 				}
 				passengers.add(passenger.get());
 		}
@@ -126,14 +126,12 @@ public class RideController {
 			body.getDestination(),
 			body.getRoute(),
 			body.getDepartureTime(),
-			50,
-			50,
 			/* 
 				TODO: need to figure out a good way to pass the duration and distance properties
 							might take some refactoring in the Ride entity
 			*/
-			// body.getDuration(),
-			// body.getDistance(),
+			body.getDuration(),
+			body.getDistance(),
 			body.getSeats(),
 			driver.get(),
 			passengers
@@ -179,5 +177,4 @@ public class RideController {
 
 		return ride;
 	}
-	
 }
