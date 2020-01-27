@@ -3,19 +3,17 @@ package is.hi.hbvproject.controller;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
+import is.hi.hbvproject.models.requestObjects.user.CreateUserRequest;
 import is.hi.hbvproject.persistence.entities.Ride;
 import is.hi.hbvproject.persistence.entities.User;
 import is.hi.hbvproject.service.RideService;
 import is.hi.hbvproject.service.UserService;
-import kong.unirest.json.JSONObject;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -74,19 +72,14 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/users/register", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
-	public User createUser(@RequestBody String body) throws JsonParseException, JsonMappingException, IOException {
-		JSONObject user = new JSONObject(body);
-		String username = user.getString("username");
-		String password = user.getString("password");
-
-		if (service.existsByUsername(username)){
-			// ekki viss með þennan status kóða
-			throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User already exists");
+	public User createUser(@RequestBody @Valid CreateUserRequest user) {
+		if (service.existsByUsername(user.getUsername())){
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exists");
 		}
 
 		User userObject = new User();
-		userObject.setUsername(username);
-		userObject.setPassword(passwordEncoder.encode(password));
+		userObject.setUsername(user.getUsername());
+		userObject.setPassword(passwordEncoder.encode(user.getPassword()));
 		service.save(userObject);
 		return userObject;
 	}
