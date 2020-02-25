@@ -6,10 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -62,6 +66,49 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       .body(makeErrorBody("parsing", "error reading request", status.value(), request));
   }
 
+  @Override
+	protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(
+      HttpMediaTypeNotSupportedException ex,
+      HttpHeaders headers,
+      HttpStatus status,
+      WebRequest request
+  ) {
+    return ResponseEntity
+    .badRequest()
+    .body(makeErrorBody("headers", ex.getMessage(), status.value(), request));
+  }
+  
+  @Override
+  protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(
+    HttpMediaTypeNotAcceptableException ex, 
+    HttpHeaders headers, 
+    HttpStatus status, 
+    WebRequest request
+  ) {
+    return ResponseEntity
+    .badRequest()
+    .body(makeErrorBody("response", ex.getMessage(), status.value(), request));
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleMissingPathVariable(
+    MissingPathVariableException ex, 
+    HttpHeaders headers, 
+    HttpStatus status, 
+    WebRequest request
+  ) {
+    return ResponseEntity
+    .badRequest()
+    .body(makeErrorBody("path", ex.getMessage(), status.value(), request));
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleAsyncRequestTimeoutException(
+    AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest webRequest) {
+
+  return handleExceptionInternal(ex, null, headers, status, webRequest);
+  }
+
   @ExceptionHandler
   protected ResponseEntity<Object> handleSocketTimeoutException(SocketTimeoutException ex) {
     // gets thrown if backend can't reach ORS for example
@@ -85,6 +132,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     HttpStatus status, 
     WebRequest request
   ) {
+    if (status.value() < 500 || status.value() > 599) {
+      Map<String, Object> responseBody = makeErrorBody("unknown", ex.getMessage(), status.value(), request);
+      responseBody.put("shame", "someone should make an error handler for this...");
+      return ResponseEntity
+      .status(status)
+      .body(responseBody);
+    }
+
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .body(makeErrorBody("internal", "internal server error", status.value(), request));
