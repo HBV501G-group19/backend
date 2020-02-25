@@ -50,7 +50,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     responseBody.put("path", path);
 
     return ResponseEntity
-      .badRequest()
+      .status(status)
       .body(responseBody);
   }
 
@@ -62,7 +62,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     WebRequest request
   ) {
     return ResponseEntity
-      .badRequest()
+      .status(status)
       .body(makeErrorBody("parsing", "error reading request", status.value(), request));
   }
 
@@ -74,7 +74,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       WebRequest request
   ) {
     return ResponseEntity
-    .badRequest()
+    .status(status)
     .body(makeErrorBody("headers", ex.getMessage(), status.value(), request));
   }
   
@@ -86,7 +86,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     WebRequest request
   ) {
     return ResponseEntity
-    .badRequest()
+    .status(status)
     .body(makeErrorBody("response", ex.getMessage(), status.value(), request));
   }
 
@@ -98,7 +98,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     WebRequest request
   ) {
     return ResponseEntity
-    .badRequest()
+    .status(status)
     .body(makeErrorBody("path", ex.getMessage(), status.value(), request));
   }
 
