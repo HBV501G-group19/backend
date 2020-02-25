@@ -1,14 +1,13 @@
 package is.hi.hbvproject.models.requestObjects.ors;
 
 import javax.validation.constraints.NotEmpty;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.wololo.geojson.Point;
 
 public class GeocodeRequest {
   @JsonProperty("focus")
-  @NotEmpty
+  // TODO: figure out how to validate this..
   private Point focus;
   
   @JsonProperty("geocode")

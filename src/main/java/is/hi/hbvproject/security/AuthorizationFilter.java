@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,13 +47,17 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
   private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest req) {
     String token = req.getHeader("Authorization");
     if (token != null) {
-      String user = JWT.require(HMAC512(jwtSecret.getBytes())).build().verify(token.replace("Bearer ", ""))
+      try {
+        String user = JWT.require(HMAC512(jwtSecret.getBytes())).build().verify(token.replace("Bearer ", ""))
           .getSubject();
-
-      if (user != null) {
-        return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+        if (user != null) {
+          return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+        }
+      } catch (SignatureVerificationException ex) {
+        // throwing this exception fucks up Springs error handling
+        // and prevents a response from being sent back
+        return null;
       }
-
       return null;
     }
 
