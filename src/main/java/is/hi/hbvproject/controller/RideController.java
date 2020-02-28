@@ -18,6 +18,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.wololo.geojson.Feature;
+import org.wololo.geojson.Point;
 
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
@@ -43,6 +44,14 @@ public class RideController {
 		this.orsService = orsService;
 	}
 
+	private JSONArray makeCoordinatesArray(Point p) {
+		JSONArray array = new JSONArray();
+		double[] coords = p.getCoordinates();
+		array.put(coords[0]);
+		array.put(coords[1]);
+		return array;
+	}
+
 	@RequestMapping(
 		value = "/rides/convenient",
 		method = RequestMethod.POST,
@@ -52,8 +61,9 @@ public class RideController {
 	public List<Ride> getConvinientRides(@RequestBody @Valid ConvinientRideRequest body) {
 		// TODO: Refactor to not need JSONArrays here
 		JSONArray locations = new JSONArray();
-		locations.put(body.getOrigin().getCoordinates());
-		locations.put(body.getDestination().getCoordinates());
+		
+		locations.put(makeCoordinatesArray(body.getOrigin()));
+		locations.put(makeCoordinatesArray(body.getDestination()));
 
 		JSONArray range = new JSONArray();
 		for(double r : body.getRange()) {
