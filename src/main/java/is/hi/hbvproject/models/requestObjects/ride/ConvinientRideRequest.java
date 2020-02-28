@@ -14,11 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wololo.geojson.Point;
 
 public class ConvinientRideRequest{
-  @JsonProperty("user")
-  @NotNull
-  @Positive
-  private Long user;
-  
+ 
   @JsonProperty("origin")
   @NotNull
   private Point origin;
@@ -31,20 +27,17 @@ public class ConvinientRideRequest{
   @NotNull
   private double[] range;
   
-  @NotEmpty
   @FutureOrPresent
   private LocalDateTime departureTime;
   
   private ConvinientRideRequest() {}
 
   public ConvinientRideRequest(
-    Long user,
     Point origin,
     Point destination,
     double[] range,
     LocalDateTime departureTime
   ) {
-    this.user = user;
     this.origin = origin;
     this.destination = destination;
     this.range = range;
@@ -55,10 +48,6 @@ public class ConvinientRideRequest{
     LocalDateTime time = LocalDateTime.parse(timeString);
     this.departureTime = time;
   }
-
-  public long getUser() {
-		return user;
-	}
 	
 	public double[] getRange() {
 		return range;
