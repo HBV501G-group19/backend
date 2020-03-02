@@ -2,25 +2,25 @@ package is.hi.hbvproject.models.requestObjects.ors;
 
 import java.util.Map;
 
-import javax.validation.constraints.NotEmpty;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.wololo.geojson.Point;
 
+import is.hi.hbvproject.models.requestObjects.ors.validation.HasProfile;
+import is.hi.hbvproject.models.requestObjects.ors.validation.ValidPoint;
 import kong.unirest.json.JSONObject;
 
 public class DirectionsRequest {
   @JsonProperty("origin")
-  @NotEmpty
+  @ValidPoint
   private Point origin;
 
   @JsonProperty("destination")
-  @NotEmpty
+  @ValidPoint
   private Point destination;
 
   @JsonProperty("properties")
-  @NotEmpty
+  @HasProfile(message = "properties.profile :: profile must be either 'foot-walking' or 'driving-car'")
   private JSONObject properties;
   
   private DirectionsRequest() {}

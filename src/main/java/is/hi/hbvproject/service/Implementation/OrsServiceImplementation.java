@@ -170,14 +170,18 @@ public class OrsServiceImplementation implements OrsService {
 			"&boundary.circle.radius=0.2" +
 			"&size=1")
     .accept("application/json")
-    .asJson().getBody();
-		
+		.asJson().getBody();
+
 		// returns a feature collection containing the names and points
 		FeatureCollection results = (FeatureCollection) GeoJSONFactory.create(response.toString());
-		// we only want the result with the highest confidence
-		Feature result = results.getFeatures()[0];
-		Map<String, Object> props = result.getProperties();
-		props.putAll(properties.toMap());
-		return new Feature(result.getGeometry(), props);
+		if (results.getFeatures().length > 0) {
+			// we only want the result with the highest confidence
+			Feature result = results.getFeatures()[0];
+			Map<String, Object> props = result.getProperties();
+			props.putAll(properties.toMap());
+			return new Feature(result.getGeometry(), props);
+		}
+
+		return null;
 	}
 }

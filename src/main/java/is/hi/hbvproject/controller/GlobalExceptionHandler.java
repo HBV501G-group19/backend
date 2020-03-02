@@ -22,6 +22,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -61,6 +65,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     HttpStatus status, 
     WebRequest request
   ) {
+    String msg = ex.getRootCause().getMessage();
+    boolean isValidationError = msg.contains("not subtype of");
+    if (isValidationError) {
+      return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(makeErrorBody("validation", "error in some field in geojson, sorry for this bad message, java spring sucks", HttpStatus.BAD_REQUEST.value(), request));
+    }
+
     return ResponseEntity
       .status(status)
       .body(makeErrorBody("parsing", "error reading request", status.value(), request));
@@ -122,6 +134,29 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return ResponseEntity
       .status(ex.getStatus())
       .body(makeErrorBody(ex.getReason(), ex.getReason(), ex.getStatus().value()));
+  }
+
+  @ExceptionHandler
+  protected ResponseEntity<Object> handleValidationException(ConstraintViolationException ex) {
+    Set<ConstraintViolation<?>> errors = ex.getConstraintViolations();
+    List<Object> errorList = new ArrayList<>();
+    for(ConstraintViolation<?> error : errors) {
+      String[] message = error.getMessage().split(" :: ");
+
+      Map<String, Object> errorObject = new HashMap<>();
+      errorObject.put("field", message[0]);
+      errorObject.put("message", message[1]);
+      errorList.add(errorObject);
+    }
+
+    Map<String, Object> responseBody = new HashMap<>();
+    responseBody.put("errors", errorList);
+    responseBody.put("error", "validation");
+    responseBody.put("status", HttpStatus.BAD_REQUEST.value());
+
+    return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST)
+      .body(responseBody);
   }
 
   @Override
