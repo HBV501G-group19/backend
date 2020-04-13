@@ -52,7 +52,7 @@ public class JwtAuthenticationController {
     String token = JWT.create()
     .withSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
     // set token to expire in 10 days
-    .withExpiresAt(new Date(System.currentTimeMillis() + 864_000_000)).sign(HMAC512(jwtSecret.getBytes()));  
+    .withExpiresAt(new Date(System.currentTimeMillis() + Integer.MAX_VALUE)).sign(HMAC512(jwtSecret.getBytes()));  
 
     Optional<Long> userId = userService.findId(username);
     return ResponseEntity.ok(new AuthenticationResponse(token, username, userId.get()));
