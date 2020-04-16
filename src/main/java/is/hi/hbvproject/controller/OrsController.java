@@ -78,7 +78,7 @@ public class OrsController {
     produces = "application/json",
     consumes = "application/json"
   )
-  public List<FeatureCollection> getDirections(@RequestBody List<@Valid DirectionsRequest> queries) {
+  public List<FeatureCollection> getDirections(@RequestBody List<DirectionsRequest> queries) {
     List<FeatureCollection> results = new ArrayList<>();
     for (DirectionsRequest d : queries) {
       List<Feature> directions = new ArrayList<>();
