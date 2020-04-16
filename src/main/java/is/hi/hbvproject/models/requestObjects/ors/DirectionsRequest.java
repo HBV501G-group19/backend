@@ -6,21 +6,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.wololo.geojson.Point;
 
-import is.hi.hbvproject.models.requestObjects.ors.validation.HasProfile;
-import is.hi.hbvproject.models.requestObjects.ors.validation.ValidPoint;
 import kong.unirest.json.JSONObject;
 
 public class DirectionsRequest {
   @JsonProperty("origin")
-  @ValidPoint
   private Point origin;
 
   @JsonProperty("destination")
-  @ValidPoint
   private Point destination;
 
   @JsonProperty("properties")
-  @HasProfile(message = "properties.profile :: profile must be either 'foot-walking' or 'driving-car'")
   private JSONObject properties;
   
   private DirectionsRequest() {}
